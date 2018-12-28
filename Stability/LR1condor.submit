@@ -1,0 +1,23 @@
+Universe   = vanilla
+Executable = LR1stab.out
+
+Request_Memory = 1024
+
+#Request_GPUs = 1
+#Requirements = CUDACapability >= 3.0
+#+SHORT_JOB=true
+
+Log = job_$(Process).log
+Output = job_$(Process).out
+Error = job_$(Process).error
+stream_output = True
+
+Initialdir = /home/jlandaw/IonicModelCPU/Stability 
+
+N = 600
+
+startpcl = 40 + 5*$(Process)
+endpcl = 45 + 5*$(Process) 
+
+Arguments = 0 1.5 $INT(startpcl) $INT(endpcl) 0.05
+Queue $(N)

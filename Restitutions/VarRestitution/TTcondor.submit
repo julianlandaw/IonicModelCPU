@@ -1,0 +1,29 @@
+Universe   = vanilla
+Executable = TTrest.out
+
+Request_Memory = 1024
+
+#Request_GPUs = 1
+#Requirements = CUDACapability >= 3.0
+#+SHORT_JOB=true
+
+Log = job_$(Process).log
+Output = job_$(Process).out
+Error = job_$(Process).error
+stream_output = True
+
+Initialdir = /home/jlandaw/IonicModelCPU/Restitutions/VarRestitution
+
+#N = 1
+
+Arguments = 0 500 0 0.0001 0.01
+Queue 1
+
+Arguments = 0 4000 0 0.0001 0.01
+Queue 1
+
+Arguments = 0.9 500 0 0.0001 0.01
+Queue 1
+
+Arguments = 0.9 4000 0 0.0001 0.01
+Queue 1

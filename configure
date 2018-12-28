@@ -1,0 +1,74 @@
+#!/bin/bash
+
+# Make symlinks to the IonicModelCPU/Cells directory into all subdirectories
+
+cd 1DCable
+rm -rf Cells
+ln -s ../Cells .
+cd ..
+cd AP
+rm -rf Cells
+ln -s ../Cells .
+cd ..
+cd Bifurcations
+cd APDBifurcation
+rm -rf Cells
+ln -s ../../Cells .
+cd ..
+cd Clamped2APDBif
+rm -rf Cells
+ln -s ../../Cells .
+cd ..
+cd DIBifurcation
+rm -rf Cells
+ln -s ../../Cells .
+cd ..
+cd NaBifurcations
+rm -rf Cells
+ln -s ../../Cells .
+cd ..
+cd TTCaiBifurcation
+rm -rf Cells
+ln -s ../../Cells .
+cd ..
+cd VaryDIBifurcation
+rm -rf Cells
+ln -s ../../Cells .
+cd ..
+cd ..
+cd ParameterSearch
+rm -rf Cells
+ln -s ../Cells .
+cd ..
+cd Restitutions
+cd APDRestitution
+rm -rf Cells
+ln -s ../../Cells .
+cd ..
+cd APDvarRestitution
+rm -rf Cells
+ln -s ../../Cells .
+cd ..
+cd Var2Restitution
+rm -rf Cells
+ln -s ../../Cells .
+cd ..
+cd VarRestitution
+rm -rf Cells
+ln -s ../../Cells .
+cd ..
+cd ..
+cd Stability
+rm -rf Cells
+ln -s ../Cells .
+cd ..
+cd VoltageClamp
+rm -rf Cells
+ln -s ../Cells .
+cd ..
+
+# Allow for python use in Cells directory
+cd Cells
+cmake .
+make
+cd ..

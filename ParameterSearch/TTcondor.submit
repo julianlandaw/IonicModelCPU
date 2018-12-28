@@ -1,0 +1,25 @@
+Universe   = vanilla
+Executable = TTapdfix.out
+
+Request_Memory = 1024
+
+#Request_GPUs = 1
+#Requirements = CUDACapability >= 3.0
+#+SHORT_JOB=true
+
+Log = job_$(Process).log
+Output = job_$(Process).out
+Error = job_$(Process).error
+stream_output = True
+
+Initialdir = /home/jlandaw/IonicModelCPU/ParameterSearch 
+
+N = 10
+
+#startpcl = 0.85
+#endpcl = 0.9
+startpcl = 1.0 + 0.05*$(Process)
+endpcl = 1.05 + 0.05*$(Process)
+
+Arguments = $REAL(startpcl) $REAL(endpcl) 1000 1000 0.05
+Queue $(N)

@@ -1,0 +1,22 @@
+Universe   = vanilla
+Executable = TTcaibif.out
+
+Request_Memory = 1024
+
+#Request_GPUs = 1
+#Requirements = CUDACapability >= 3.0
+#+SHORT_JOB=true
+
+Log = job_$(Process).log
+Output = job_$(Process).out
+Error = job_$(Process).error
+stream_output = True
+
+Initialdir = /home/jlandaw/IonicModelCPU/Bifurcations/TTCaiBifurcation 
+
+N = 2000
+
+a1 = 4000 + $(Process)
+
+Arguments = 0.9 0.9 4.$INT(a1)e-5 4.$INT(a1)e-5 0.025
+Queue $(N)

@@ -1,0 +1,31 @@
+Universe   = vanilla
+Executable = LR1varydibif.out
+
+Request_Memory = 1024
+
+#Request_GPUs = 1
+#Requirements = CUDACapability >= 3.0
+#+SHORT_JOB=true
+
+Log = job_$(Process).log
+Output = job_$(Process).out
+Error = job_$(Process).error
+stream_output = True
+
+Initialdir = /home/jlandaw/IonicModelCPU/Bifurcations/VaryDIBifurcation 
+
+N = 101*101
+O = ($(Process) / 101)
+P = ($(Process) % 101)
+
+a1 = (1 + 0.01*$(O))
+a2 = $(a1) 
+
+di1 = 100 + 1*$(P)
+di2 = $(di1)
+
+numapd = 1
+
+#Arguments = 0 $REAL(di1) $REAL(a1) $INT(numapd) 0.05
+Arguments = 0 0 $REAL(di1) $REAL(di2) $REAL(a1) $REAL(a2) $INT(numapd) 0.05
+Queue $(N)

@@ -1,0 +1,29 @@
+Universe   = vanilla
+Executable = LR1_taudbif.out
+
+Request_Memory = 1024
+
+#Request_GPUs = 1
+#Requirements = CUDACapability >= 3.0
+#+SHORT_JOB=true
+
+Log = job_$(Process).log
+Output = job_$(Process).out
+Error = job_$(Process).error
+stream_output = True
+
+Initialdir = /home/jlandaw/IonicModelCPU/Bifurcations/APDBifurcation 
+
+N = 1600
+
+taud = 2005 + 5*$(Process)
+#pcl1 = 500 + 10*$(Process)
+#pcl2 = 509 + 10*$(Process)
+
+#ito1 = $(Process)
+#ito2 = 
+
+#Arguments = 0.$INT(ito1) 0.$INT(ito1)9 2000 2000 0.05
+
+Arguments = $INT(taud) $INT(taud).9 125 2000 0.05
+Queue $(N)

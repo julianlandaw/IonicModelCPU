@@ -1,0 +1,26 @@
+Universe   = vanilla
+Executable = TTSKbif.out
+
+Request_Memory = 128
+
+#Request_GPUs = 1
+#Requirements = CUDACapability >= 3.0
+#+SHORT_JOB=true
+
+Log = job_$(Process).log
+Output = job_$(Process).out
+Error = job_$(Process).error
+stream_output = True
+
+Initialdir = /home/jlandaw/IonicModelCPU/Bifurcations/Clamped2APDBif 
+
+
+N = 1000
+
+pcl1 = 50 + 5*$(Process)
+pcl2 = 55 + 5*$(Process)
+nai = 12
+ki = 138
+
+Arguments = $INT(pcl1) $INT(pcl2) 0.0005 0.0005 $INT(nai) $INT(nai) $INT(ki) $INT(ki) 0.05
+Queue $(N)

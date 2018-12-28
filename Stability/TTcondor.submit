@@ -1,0 +1,23 @@
+Universe   = vanilla
+Executable = TTstab.out
+
+Request_Memory = 1024
+
+#Request_GPUs = 1
+#Requirements = CUDACapability >= 3.0
+#+SHORT_JOB=true
+
+Log = job_$(Process).log
+Output = job_$(Process).out
+Error = job_$(Process).error
+stream_output = True
+
+Initialdir = /home/jlandaw/IonicModelCPU/Stability 
+
+N = 1000
+
+startpcl = 5040 + 5*$(Process)
+endpcl = 5045 + 5*$(Process) 
+
+Arguments = 0.84 1.0 $INT(startpcl) $INT(endpcl) 0.05
+Queue $(N)

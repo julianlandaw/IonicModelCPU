@@ -1,0 +1,36 @@
+Universe   = vanilla
+Executable = LR2SKbif.out
+
+Request_Memory = 128
+
+#Request_GPUs = 1
+#Requirements = CUDACapability >= 3.0
+#+SHORT_JOB=true
+
+Log = job_$(Process).log
+Output = job_$(Process).out
+Error = job_$(Process).error
+stream_output = True
+
+Initialdir = /home/jlandaw/IonicModelCPU/Bifurcations/APDBifurcation 
+
+N = 400
+#maxO = 31
+#maxP = 31
+#N = $(maxO)*$(maxP)
+
+#O = ($(Process) / 31)
+#P = ($(Process) % 31)
+
+ito = 0.01*$(Process)
+isk = 0
+#ikr = 0.1 * $(O)
+#iks = 0.1 * $(P)
+#ito1 = 0.00005 + 0.00005*$(Process)
+#ito2 = 0.00005 + 0.00005*$(Process)
+pcl=500
+
+#Arguments = 0 20 $REAL(ito1) $REAL(ito2) $INT(pcl1) $INT(pcl2) 0.025
+Arguments = $REAL(ito) $REAL(ito) $REAL(isk) $REAL(isk) $INT(pcl) $INT(pcl) 0.025
+
+Queue $(N)

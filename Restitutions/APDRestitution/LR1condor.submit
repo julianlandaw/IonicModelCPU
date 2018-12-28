@@ -1,0 +1,22 @@
+Universe   = vanilla
+Executable = LR1rest.out
+
+Request_Memory = 1024
+
+#Request_GPUs = 1
+#Requirements = CUDACapability >= 3.0
+#+SHORT_JOB=true
+
+Log = job_$(Process).log
+Output = job_$(Process).out
+Error = job_$(Process).error
+stream_output = True
+
+Initialdir = /home/jlandaw/IonicModelCPU/Restitutions/APDRestitution 
+
+N = 10
+
+pcl = $(process)*100 + 100
+
+Arguments = 1.2 $INT(pcl) 0.1 1000 0.05
+Queue $(N)

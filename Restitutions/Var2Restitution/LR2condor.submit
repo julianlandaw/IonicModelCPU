@@ -1,0 +1,22 @@
+Universe   = vanilla
+Executable = LR2rest.out
+
+Request_Memory = 1024
+
+#Request_GPUs = 1
+#Requirements = CUDACapability >= 3.0
+#+SHORT_JOB=true
+
+Log = job_$(Process).log
+Output = job_$(Process).out
+Error = job_$(Process).error
+stream_output = True
+
+Initialdir = /home/jlandaw/IonicModelCPU/Restitutions/Var2Restitution
+
+N = 1
+#300 to 1500
+pcl = 3000
+
+Arguments = 0 $INT(pcl) 0 20 0 0.005 0.025
+Queue $(N)

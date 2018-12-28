@@ -1,0 +1,26 @@
+Universe   = vanilla
+Executable = TTvarydibif.out
+
+Request_Memory = 1024
+
+#Request_GPUs = 1
+#Requirements = CUDACapability >= 3.0
+#+SHORT_JOB=true
+
+Log = job_$(Process).log
+Output = job_$(Process).out
+Error = job_$(Process).error
+stream_output = True
+
+Initialdir = /home/jlandaw/IonicModelCPU/Bifurcations/VaryDIBifurcation 
+
+N = 100
+di1 = 8860
+#di2 = $(di1)
+a1 = 50 + 0.1*$(Process)
+#a2 = $(a1)
+numapd = 0
+
+#Arguments = 0.9 0.9 $REAL(di1) $REAL(di2) $REAL(a1) $REAL(a2) $INT(numapd) 0.05
+Arguments = 0.9 $REAL(di1) $REAL(a1) $INT(numapd) 0.05
+Queue $(N)

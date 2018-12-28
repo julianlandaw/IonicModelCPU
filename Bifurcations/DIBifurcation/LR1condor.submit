@@ -1,0 +1,28 @@
+Universe   = vanilla
+Executable = LR1dibif.out
+
+Request_Memory = 1024
+
+#Request_GPUs = 1
+#Requirements = CUDACapability >= 3.0
+#+SHORT_JOB=true
+
+Log = job_$(Process).log
+Output = job_$(Process).out
+Error = job_$(Process).error
+stream_output = True
+
+Initialdir = /home/jlandaw/IonicModelCPU/Bifurcations/DIBifurcation 
+
+N = 51
+
+di1 = 920 + 1*$(Process)
+di2 = 921 + 1*$(Process)
+
+#ito1 = 1.05
+#ito2 = 1.05
+
+Arguments = 0 0 $INT(di1) $INT(di1).9 0.05
+
+#Arguments = 1.39 1.39 $INT(pcl1) $INT(pcl2).9 0.05
+Queue $(N)

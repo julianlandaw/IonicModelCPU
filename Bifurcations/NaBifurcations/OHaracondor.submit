@@ -1,0 +1,31 @@
+Universe   = vanilla
+Executable = OHarabif.out
+
+Request_Memory = 128
+
+#Request_GPUs = 1
+#Requirements = CUDACapability >= 3.0
+#+SHORT_JOB=true
+
+Log = job_$(Process).log
+Output = job_$(Process).out
+Error = job_$(Process).error
+stream_output = True
+
+Initialdir = /home/jlandaw/IonicModelCPU/Bifurcations/APDBifurcation 
+
+N = 101*101
+O = ($(Process) % 101)
+P = ($(Process) / 101)
+
+pcl1 = 500
+pcl2 = $(pcl1)
+
+isk1 = 0.4*$(O)
+isk2 = $(isk1)
+skh1 = 0.0004*$(P)
+skh2 = $(isk1)
+
+Arguments = $REAL(isk1) $REAL(isk2) $REAL(skh1) $REAL(skh2) $INT(pcl1) $INT(pcl2) 0.05
+
+Queue $(N)
