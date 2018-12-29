@@ -423,11 +423,29 @@ extern "C"
         }
         else {return TTCell->cai[0];}
     }
+    double TT_getnai(TTCellIto<CELLS>* TTCell, int id) {
+        if (id > -1 && id < CELLS) {  
+             return TTCell->nai[id];
+        }
+        else {return TTCell->nai[0];}
+    }
+    double TT_getki(TTCellIto<CELLS>* TTCell, int id) {
+        if (id > -1 && id < CELLS) {  
+             return TTCell->ki[id];
+        }
+        else {return TTCell->ki[0];}
+    }
     double TT_getvsing(TTCellIto<1>* TTCell) {
         return TTCell->v[0];
     }
     double TT_getcaising(TTCellIto<1>* TTCell) {
         return TTCell->cai[0];
+    }
+    double TT_getnaising(TTCellIto<1>* TTCell) {
+        return TTCell->nai[0];
+    }
+    double TT_getkising(TTCellIto<1>* TTCell) {
+        return TTCell->ki[0];
     }
     void TT_setv(TTCellIto<CELLS>* TTCell, int id, double v) {
         if (id > -1 && id < CELLS) {  
@@ -437,6 +455,22 @@ extern "C"
     void TT_setvsing(TTCellIto<1>* TTCell, double v) {
         TTCell->v[0] = v;
     }
+    void TT_setcai(TTCellIto<CELLS>* TTCell, int id, double v) {
+        if (id > -1 && id < CELLS) {  
+            TTCell->cai[id] = v;
+        }
+    }
+    void TT_setcaising(TTCellIto<1>* TTCell, double v) {
+        TTCell->cai[0] = v;
+    }
+    void TT_setnai(TTCellIto<CELLS>* TTCell, int id, double v) {
+        if (id > -1 && id < CELLS) {  
+            TTCell->nai[id] = v;
+        }
+    }
+    void TT_setnaising(TTCellIto<1>* TTCell, double v) {
+        TTCell->nai[0] = v;
+    }
     void TT_setito(TTCellIto<CELLS>* TTCell, int id, double itofac) {
         if (id > -1 && id < CELLS) {  
             TTCell->itofac[id] = itofac;
@@ -444,6 +478,30 @@ extern "C"
     }
     void TT_setitosing(TTCellIto<1>* TTCell, double itofac) {
         TTCell->itofac[0] = itofac;
+    }
+    void TT_clampnai(TTCellIto<CELLS>* TTCell, int id) {
+        TTCell->naiclamped[id] = true;
+    }
+    void TT_clampnaising(TTCellIto<1>* TTCell) {
+        TTCell->naiclamped[0] = true;
+    }
+    void TT_clampki(TTCellIto<CELLS>* TTCell, int id) {
+        TTCell->kiclamped[id] = true;
+    }
+    void TT_clampkising(TTCellIto<1>* TTCell) {
+        TTCell->kiclamped[0] = true;
+    }
+    void TT_unclampnai(TTCellIto<CELLS>* TTCell, int id) {
+        TTCell->naiclamped[id] = false;
+    }
+    void TT_unclampnaising(TTCellIto<1>* TTCell) {
+        TTCell->naiclamped[0] = false;
+    }
+    void TT_unclampki(TTCellIto<CELLS>* TTCell, int id) {
+        TTCell->kiclamped[id] = false;
+    }
+    void TT_unclampkising(TTCellIto<1>* TTCell) {
+        TTCell->kiclamped[0] = false;
     }
     void TT_copycell(TTCellIto<CELLS>* TTCell, int id, TTCellIto<1>* TTCell2) {
         TTCell->setcell(id,TTCell2);
