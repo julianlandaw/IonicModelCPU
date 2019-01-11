@@ -209,6 +209,12 @@ int main(int argc, char *argv[])
 #elif TT
 	    ito = h_cell->comp_ito(0,dt,dxtof,dytof);
 	    isk = h_cell->comp_isk(0);
+#elif LR2
+	    h_cell->comp_ito(0,dt,dxtof,dytof,ito);
+	    h_cell->comp_isk(0,isk);
+#elif OHara
+	    ito = h_cell->comp_ito(0,dt,dxtos,dytos,dxtof,dytof,dxtof,dytof);
+	    isk = h_cell->comp_isk(0);
 #else
 	    h_cell->comp_ito(0,dt,dxtos,dytos,dxtof,dytof,ito);
 	    h_cell->comp_isk(0,isk);
