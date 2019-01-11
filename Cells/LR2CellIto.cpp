@@ -362,7 +362,7 @@ void LR2CellIto<ncells>::comp_ina (int id, double dt, double& dm, double& dh, do
     double ena, am, bm, ah, bh, aj, bj, mtau, htau, jtau, mss, hss, jss; 
     ena = ((R*temp)/frdy)*log(nao[id]/nai[id]); 
 
-    if (abs(v[id] + 47.13) < 1e-2) {
+    if (fabs(v[id] + 47.13) < 1e-2) {
         am = 0.32/0.1;    
     }
     else {
