@@ -231,8 +231,8 @@ bool UCLACell<ncells>::iterate(const int id, double dt, double st, double dv_max
     trops[id] += xbs*dt;
     
 #ifdef xiaodong
-    d[id] += dd;
-    f[id] += df;
+    d[id] = dd;
+    f[id] = df;
 #else
     c1[id] += dc1*dt;
     c2[id] += dc2*dt;
@@ -377,10 +377,8 @@ double UCLACell<ncells>::comp_iks(int id, double dt, double& dxs1, double& dxs2)
     eks = (1.0/frt)*log((xko + prnak*xnao)/(xki + prnak*nai[id]));
     xs1ss = 1.0/(1.0 + exp(-(v[id] - 1.50)/16.70));
     xs2ss = xs1ss;
-    if (fabs(v[id] + 30.0) < 0.001/0.0687) {
-        tauxs1 = 1.0/(0.0000719/0.148 + 0.000131/0.0687);
-    }
-    else {
+    tauxs1 = 1.0/(0.0000719/0.148 + 0.000131/0.0687);
+    if (fabs(v[id] + 30.0) > 0.001) {
         tauxs1 = 1.0/(0.0000719*(v[id] + 30.0)/(1.0 - exp(-0.148*(v[id] + 30.0))) + 0.000131*(v[id] + 30.0)/(exp(0.0687*(v[id] + 30.0)) - 1.0));
     }
     tauxs2 = 4*tauxs1;
@@ -411,7 +409,7 @@ double UCLACell<ncells>::comp_ik1 (int id)
 
 #define xkmko 1.5
 #define xkmnai 12.0
-#define sigma (exp(xnao/67.3)-1.0)/7.0
+#define sigma ((exp(xnao/67.3)-1.0)/7.0)
 
 template <int ncells>
 double UCLACell<ncells>::comp_inak(int id) {
@@ -474,21 +472,23 @@ template <int ncells>
 double UCLACell<ncells>::comp_icalpo(int id, double dt, double& dd, double& df) {
     double dss, taudx, fss, tauf, fca, po;
     dss = 1.0/(1.0+exp(-(v[id]+10.0)/6.24)); 
-    if (abs(v[id] + 10.0) < 1e-2) {
-        taudx = dss*1.0/(6.24*0.035);    
-    }
-    else {
+    taudx = dss*1.0/(6.24*0.035);
+    if (fabs(v[id] + 10.0) > 0.001) {
         taudx = dss*(1.0-exp(-(v[id]+10.0)/6.24))/(0.035*(v[id]+10.0)); 
     }
     //taudx = dss*(1.0-exp(-(v[id]+10.0)/6.24))/(0.035*(v[id]+10.0)); 
 
     fss = (1.0/(1.0+exp((v[id]+32.0)/8.0)))+(0.6/(1.0+exp((50.0-v[id])/20.0))); 
-    tauf = 1.0/(0.0197*exp(-pow(0.0337*(v[id]+10.0),2.0))+0.02);
+    tauf = 1.0/(0.0197*exp(-(0.0337*(v[id]+10.0)*0.0337*(v[id]+10.0))) + 0.02);
+    //tauf = 1.0/(0.0197*exp(-pow(0.0337*(v[id]+10.0),2.0))  +0.02);
     
-    dd = dss-(dss-d[id])*exp(-dt/taudx) - d[id]; 
-    df = fss-(fss-f[id])*exp(-dt/tauf) - f[id];
+    dd = dss-(dss-d[id])*exp(-dt/taudx); 
+    df = fss-(fss-f[id])*exp(-dt/tauf);
     
-    fca = 1.0/(1.0 + cs[id]/0.6);
+    fca = 1.0;
+    if (cs[id] > 0) {
+        fca = 1.0/(1.0 + cs[id]/0.6);
+    }
     
     po = d[id]*f[id]*fca;
     

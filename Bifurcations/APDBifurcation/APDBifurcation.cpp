@@ -232,9 +232,9 @@ void APDBifurcation<typecell, ncells, beats>::dobif(long double dt, double start
             printf("%g\t%d\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",(double)t,curbeat[0],Cells.v[0],Cells.cai[0],Cells.nai[0],Cells.ki[0],Cells.jsr[0],Cells.nsr[0],Cells.tcicr[0]);
 #elif UCLA
 #ifdef xiaodong
-	    printf("%g\t%d\t%g\t%g\t%g\t%g\t%g\t%g\n",(double)t, curbeat[0], Cells.v[0], Cells.nai[0], Cells.ci[0], Cells.cs[0], Cells.d[0], Cells.f[0]);
+            printf("%g\t%d\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",(double)t, curbeat[0], Cells.v[0], Cells.nai[0], Cells.ci[0], Cells.cs[0], Cells.cj[0], Cells.cjp[0], apds[curbeat[0]]);
 #else
-	    printf("%g\t%d\t%g\t%g\n",(double)t, curbeat[0], Cells.v[0], Cells.nai[0]);
+            printf("%g\t%d\t%g\t%g\t%g\n",(double)t, curbeat[0], Cells.v[0], Cells.nai[0], apds[curbeat[0]]);
 #endif
 #else
             printf("%g\t%d\t%g\n",(double)t, curbeat[0], Cells.v[0]);

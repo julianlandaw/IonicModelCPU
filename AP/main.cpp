@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
     //h_cell->ibarcafac[0] = 6e-4/(gcal);
     //h_cell->ikrfac[0] = 0.01/(gkr);
     //h_cell->iksfac[0] = 0.036/(gks);
-    //h_cell->nacafac[0] = 2.0;
+    h_cell->nacafac[0] = 4.0;
 #endif
 #ifdef LR2
     h_cell->skh[0] = 0.0008; //0.0025
@@ -150,9 +150,13 @@ int main(int argc, char *argv[])
     h_cell->iupfac[0] = 3.0;
 #endif
 #ifdef UCLA
-    h_cell->itofac[0] = 0.0;
+    h_cell->itofac[0] = 1.0;
     h_cell->iskfac[0] = 0.0;
     h_cell->skh[0] = 0.6;
+    h_cell->nacafac[0] = 0.3;
+    h_cell->iksfac[0] = 0.5;
+    //h_cell->nacafac[0] = 0.15;
+    //h_cell->iksfac[0] = 0.9;
 #endif
 #ifdef OHara
     h_cell->itofac[0] = 0.0;
@@ -202,6 +206,9 @@ int main(int argc, char *argv[])
 #ifdef UCLA
 	    ito = h_cell->comp_ito(0,dt,dxtos,dytos,dxtof,dytof);
 	    isk = h_cell->comp_isk(0);
+#elif TT
+	    ito = h_cell->comp_ito(0,dt,dxtof,dytof);
+	    isk = h_cell->comp_isk(0);
 #else
 	    h_cell->comp_ito(0,dt,dxtos,dytos,dxtof,dytof,ito);
 	    h_cell->comp_isk(0,isk);
@@ -234,7 +241,7 @@ int main(int argc, char *argv[])
             fprintf(ap,"%g\t%g\t%g\n",(double)t - t_savestart,h_cell->v[0],h_cell->h[0]);
 #endif
 #ifdef UCLA
-			fprintf(ap,"%g\t%g\t%g\t%g\t%g\t%g\n",(double)t - t_savestart, h_cell->v[0], h_cell->ci[0], h_cell->cs[0], ito, isk);
+			fprintf(ap,"%g\t%g\t%g\t%g\t%g\t%g\t%g\n",(double)t - t_savestart, h_cell->v[0], h_cell->ci[0], h_cell->cs[0], h_cell->nai[0], h_cell->ytos[0], isk);
 #endif
 #ifdef OHara
             fprintf(ap,"%g\t%g\t%g\t%g\t%g\t%g\n",(double)t - t_savestart, h_cell->v[0], h_cell->cai[0], h_cell->cass[0], ito, isk);

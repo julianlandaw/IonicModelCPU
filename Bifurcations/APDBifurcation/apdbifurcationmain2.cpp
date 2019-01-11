@@ -179,7 +179,8 @@ int main(int argc, char *argv[])
     double _icalfac = 1.0;
     double _ikrfac = 1.0;
     double _iksfac = 1.0;
-    double _nai = 8.0;
+    double _nai = 16.0;
+    double _nacafac = 0.3;
         #endif
     
     double byvar1 = (numvar1 > 1) ? (maxvar1 - minvar1)/(numvar1 - 1) : 1;
@@ -337,6 +338,7 @@ int main(int argc, char *argv[])
                 h_cells->Cells.ikrfac[index] = _ikrfac;
                 h_cells->Cells.iksfac[index] = _iksfac;
                 h_cells->Cells.nai[index] = _nai;
+                h_cells->Cells.nacafac[index] = _nacafac;
 #endif
             
 #ifdef LR1_taud
