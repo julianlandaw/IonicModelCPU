@@ -537,126 +537,126 @@ extern "C"
     TP06Cell<1>* TP06Cell_newsing() {
         return new TP06Cell<1>();
     }
-    void TP06_stepdt(TP06Cell<CELLS>* TP06Cell,int id, double dt, double st) {
-        TP06Cell->stepdt(id,dt,st);
+    void TP06_stepdt(TP06Cell<CELLS>* TP06cell, int id, double dt, double st) {
+        TP06cell->stepdt(id,dt,st);
     }
-    void TP06_stepdtsing(TP06Cell<1>* TP06Cell, double dt, double st) {
-        TP06Cell->stepdt(0,dt,st);
+    void TP06_stepdtsing(TP06Cell<1>* TP06cell, double dt, double st) {
+        TP06cell->stepdt(0,dt,st);
     }
-    double TP06_getv(TP06Cell<CELLS>* TP06Cell, int id) {
+    double TP06_getv(TP06Cell<CELLS>* TP06cell, int id) {
         if (id > -1 && id < CELLS) {  
-             return TP06Cell->v[id];
+             return TP06cell->v[id];
         }
-        else {return TP06Cell->v[0];}
+        else {return TP06cell->v[0];}
     }
-    double TP06_getcai(TP06Cell<CELLS>* TP06Cell, int id) {
+    double TP06_getcai(TP06Cell<CELLS>* TP06cell, int id) {
         if (id > -1 && id < CELLS) {  
-             return TP06Cell->cai[id];
+             return TP06cell->cai[id];
         }
-        else {return TP06Cell->cai[0];}
+        else {return TP06cell->cai[0];}
     }
-    double TP06_getnai(TP06Cell<CELLS>* TP06Cell, int id) {
+    double TP06_getnai(TP06Cell<CELLS>* TP06cell, int id) {
         if (id > -1 && id < CELLS) {  
-             return TP06Cell->nai[id];
+             return TP06cell->nai[id];
         }
-        else {return TP06Cell->nai[0];}
+        else {return TP06cell->nai[0];}
     }
-    double TP06_getki(TP06Cell<CELLS>* TP06Cell, int id) {
+    double TP06_getki(TP06Cell<CELLS>* TP06cell, int id) {
         if (id > -1 && id < CELLS) {  
-             return TP06Cell->ki[id];
+             return TP06cell->ki[id];
         }
-        else {return TP06Cell->ki[0];}
+        else {return TP06cell->ki[0];}
     }
-    double TP06_getvsing(TP06Cell<1>* TP06Cell) {
-        return TP06Cell->v[0];
+    double TP06_getvsing(TP06Cell<1>* TP06cell) {
+        return TP06cell->v[0];
     }
-    double TP06_getcaising(TP06Cell<1>* TP06Cell) {
-        return TP06Cell->cai[0];
+    double TP06_getcaising(TP06Cell<1>* TP06cell) {
+        return TP06cell->cai[0];
     }
-    double TP06_getnaising(TP06Cell<1>* TP06Cell) {
-        return TP06Cell->nai[0];
+    double TP06_getnaising(TP06Cell<1>* TP06cell) {
+        return TP06cell->nai[0];
     }
-    double TP06_getkising(TP06Cell<1>* TP06Cell) {
-        return TP06Cell->ki[0];
+    double TP06_getkising(TP06Cell<1>* TP06cell) {
+        return TP06cell->ki[0];
     }
-    void TP06_setv(TP06Cell<CELLS>* TP06Cell, int id, double v) {
+    void TP06_setv(TP06Cell<CELLS>* TP06cell, int id, double v) {
         if (id > -1 && id < CELLS) {  
-            TP06Cell->v[id] = v;
-        }
-    }
-    void TP06_setvsing(TP06Cell<1>* TP06Cell, double v) {
-        TP06Cell->v[0] = v;
-    }
-    void TP06_setcai(TP06Cell<CELLS>* TP06Cell, int id, double v) {
-        if (id > -1 && id < CELLS) {  
-            TP06Cell->cai[id] = v;
+            TP06cell->v[id] = v;
         }
     }
-    void TP06_setcaising(TP06Cell<1>* TP06Cell, double v) {
-        TP06Cell->cai[0] = v;
+    void TP06_setvsing(TP06Cell<1>* TP06cell, double v) {
+        TP06cell->v[0] = v;
     }
-    void TP06_setnai(TP06Cell<CELLS>* TP06Cell, int id, double v) {
+    void TP06_setcai(TP06Cell<CELLS>* TP06cell, int id, double v) {
         if (id > -1 && id < CELLS) {  
-            TP06Cell->nai[id] = v;
+            TP06cell->cai[id] = v;
         }
     }
-    void TP06_setnaising(TP06Cell<1>* TP06Cell, double v) {
-        TP06Cell->nai[0] = v;
+    void TP06_setcaising(TP06Cell<1>* TP06cell, double v) {
+        TP06cell->cai[0] = v;
     }
-    void TP06_setito(TP06Cell<CELLS>* TP06Cell, int id, double itofac) {
+    void TP06_setnai(TP06Cell<CELLS>* TP06cell, int id, double v) {
         if (id > -1 && id < CELLS) {  
-            TP06Cell->itofac[id] = itofac;
+            TP06cell->nai[id] = v;
         }
     }
-    void TP06_setitosing(TP06Cell<1>* TP06Cell, double itofac) {
-        TP06Cell->itofac[0] = itofac;
+    void TP06_setnaising(TP06Cell<1>* TP06cell, double v) {
+        TP06cell->nai[0] = v;
     }
-    void TP06_clampnai(TP06Cell<CELLS>* TP06Cell, int id) {
-        TP06Cell->naiclamped[id] = true;
+    void TP06_setito(TP06Cell<CELLS>* TP06cell, int id, double itofac) {
+        if (id > -1 && id < CELLS) {  
+            TP06cell->itofac[id] = itofac;
+        }
     }
-    void TP06_clampnaising(TP06Cell<1>* TP06Cell) {
-        TP06Cell->naiclamped[0] = true;
+    void TP06_setitosing(TP06Cell<1>* TP06cell, double itofac) {
+        TP06cell->itofac[0] = itofac;
     }
-    void TP06_clampki(TP06Cell<CELLS>* TP06Cell, int id) {
-        TP06Cell->kiclamped[id] = true;
+    void TP06_clampnai(TP06Cell<CELLS>* TP06cell, int id) {
+        TP06cell->naiclamped[id] = true;
     }
-    void TP06_clampkising(TP06Cell<1>* TP06Cell) {
-        TP06Cell->kiclamped[0] = true;
+    void TP06_clampnaising(TP06Cell<1>* TP06cell) {
+        TP06cell->naiclamped[0] = true;
     }
-    void TP06_unclampnai(TP06Cell<CELLS>* TP06Cell, int id) {
-        TP06Cell->naiclamped[id] = false;
+    void TP06_clampki(TP06Cell<CELLS>* TP06cell, int id) {
+        TP06cell->kiclamped[id] = true;
     }
-    void TP06_unclampnaising(TP06Cell<1>* TP06Cell) {
-        TP06Cell->naiclamped[0] = false;
+    void TP06_clampkising(TP06Cell<1>* TP06cell) {
+        TP06cell->kiclamped[0] = true;
     }
-    void TP06_unclampki(TP06Cell<CELLS>* TP06Cell, int id) {
-        TP06Cell->kiclamped[id] = false;
+    void TP06_unclampnai(TP06Cell<CELLS>* TP06cell, int id) {
+        TP06cell->naiclamped[id] = false;
     }
-    void TP06_unclampkising(TP06Cell<1>* TP06Cell) {
-        TP06Cell->kiclamped[0] = false;
+    void TP06_unclampnaising(TP06Cell<1>* TP06cell) {
+        TP06cell->naiclamped[0] = false;
     }
-    void TP06_copycell(TP06Cell<CELLS>* TP06Cell, int id, TP06Cell<1>* TP06Cell2) {
-        TP06Cell->setcell(id,TP06Cell2);
+    void TP06_unclampki(TP06Cell<CELLS>* TP06cell, int id) {
+        TP06cell->kiclamped[id] = false;
     }
-    void TP06_copycellsing(TP06Cell<1>* TP06Cell, TP06Cell<1>* TP06Cell2) {
-        TP06Cell->setcell(0,TP06Cell2);
+    void TP06_unclampkising(TP06Cell<1>* TP06cell) {
+        TP06cell->kiclamped[0] = false;
     }
-    void TP06_diffuse1D(TP06Cell<CELLS>* TP06Cell, double D, int id) {
+    void TP06_copycell(TP06Cell<CELLS>* TP06cell, int id, TP06Cell<1>* TP06cell2) {
+        TP06cell->setcell(id,TP06cell2);
+    }
+    void TP06_copycellsing(TP06Cell<1>* TP06cell, TP06Cell<1>* TP06cell2) {
+        TP06cell->setcell(0,TP06cell2);
+    }
+    void TP06_diffuse1D(TP06Cell<CELLS>* TP06cell, double D, int id) {
         if (CELLS > 1) {
             if (id == 0){
-                TP06Cell->diffcurrent[id] = D*(TP06Cell->v[id+1] - TP06Cell->v[id]);
+                TP06cell->diffcurrent[id] = D*(TP06cell->v[id+1] - TP06cell->v[id]);
             }
             else if (id < CELLS - 1) {
-                TP06Cell->diffcurrent[id] = D*(TP06Cell->v[id+1] - TP06Cell->v[id]) + D*(TP06Cell->v[id-1] - TP06Cell->v[id]);
+                TP06cell->diffcurrent[id] = D*(TP06cell->v[id+1] - TP06cell->v[id]) + D*(TP06cell->v[id-1] - TP06cell->v[id]);
             }
             else if (id == CELLS - 1) {
-                TP06Cell->diffcurrent[id] = D*(TP06Cell->v[id-1] - TP06Cell->v[id]);
+                TP06cell->diffcurrent[id] = D*(TP06cell->v[id-1] - TP06cell->v[id]);
             }
         }
     }
-    void TP06_diffuse1Dall(TP06Cell<CELLS>* TP06Cell, double D) {
+    void TP06_diffuse1Dall(TP06Cell<CELLS>* TP06cell, double D) {
         for (int i = 0; i < CELLS; i++) {
-            TP06_diffuse1D(TP06Cell, D, i);
+            TP06_diffuse1D(TP06cell, D, i);
         }
     }
 }
