@@ -22,11 +22,42 @@
 #ifdef TT
 #define TYPECELL TTCellIto
 #define TYPECELLSTRING "TT"
+#define gnaped 0.01
 #include "Cells/TTCellIto.cpp"
-#else
+
+#elif TP06
+#define TYPECELL TP06Cell
+#define TYPECELLSTRING "TP06"
+#include "Cells/TP06Cell.cpp"
+
+#elif LR1
 #define TYPECELL LR1CellIto
 #define TYPECELLSTRING "LR1"
 #include "Cells/LR1CellIto.cpp"
+#elif LR2
+#define TYPECELL LR2CellIto
+#define TYPECELLSTRING "LR2"
+#include "Cells/LR2CellIto.cpp"
+#elif LR1SK
+#define TYPECELL LR1CellItoSK
+#define TYPECELLSTRING "LR1SK"
+#include "Cells/LR1CellItoSK.cpp"
+#elif Fenton
+#define TYPECELL FentonCell
+#define TYPECELLSTRING "Fenton"
+#include "Cells/FentonCell.cpp"
+#elif LR1CellMod
+#define TYPECELL LR1CellMod
+#define TYPECELLSTRING "LR1Mod"
+#include "Cells/LR1CellItoMod.cpp"
+#elif OHara
+#define TYPECELL OHaraCell
+#define TYPECELLSTRING "OHara"
+#include "Cells/OHaraCell.cpp"
+#else
+#define TYPECELL TTCellMod
+#define TYPECELLSTRING "TTMod"
+#include "Cells/TTCellMod.cpp"
 #endif
 
 #ifndef NCELLS
@@ -70,6 +101,23 @@ int main(int argc, char *argv[])
     h_cells->CommonCell.ikfac[0] = 1.0;
     h_cells->CommonCell.ikifac[0] = 1.0; //2.2; 
 #endif
+#ifdef LR2
+    h_cells->CommonCell.itofac[0] = 0.0;
+    h_cells->CommonCell.iskfac[0] = 0.0;
+    h_cells->CommonCell.iupfac[0] = 1.0;
+    h_cells->CommonCell.skh[0] = 0.002;
+#endif
+#ifdef OHara
+    h_cells->CommonCell.itofac[0] = 0.0;
+    h_cells->CommonCell.iskfac[0] = 0.0;
+    h_cells->CommonCell.alphask[0] = 0.0;
+    h_cells->CommonCell.inafac[0] = 2.0;
+    h_cells->CommonCell.skh[0] = 0.001;
+    h_cells->CommonCell.nai[0] = 7.96;
+    h_cells->CommonCell.ki[0] = 146.0;
+    h_cells->CommonCell.ikrfac[0] = 1.0;
+    h_cells->CommonCell.iksfac[0] = 1.0;
+#endif
 #ifdef TT
 #ifdef clampki
     h_cells->CommonCell.ki[0] = 138.0;
@@ -78,23 +126,23 @@ int main(int argc, char *argv[])
     h_cells->CommonCell.nai[0] = 12.0;
 #endif
 #endif
-    h_cells->CommonCell.itofac[0] = itofac;
+    h_cells->CommonCell.VARIABLE[0] = itofac;
     h_cells->basepcl = pcl;
     h_cells->commondt = dt;
     
     FILE *rest;
     char fileSpec1[100];
-    snprintf(fileSpec1, 100, "%srestPCL_%g_ITO_%g.txt", TYPECELLSTRING, pcl, itofac);
+    snprintf(fileSpec1, 100, "%srestPCL_%g_VAR_%g.txt", TYPECELLSTRING, pcl, itofac);
     rest = fopen(fileSpec1, "w");
     
     FILE *saveconditions;
     char fileSpec2[100];
-    snprintf(fileSpec2, 100, "%sVARS_PCL_%g_ITO_%g.txt", TYPECELLSTRING, pcl, itofac);
+    snprintf(fileSpec2, 100, "%sVARS_PCL_%g_VAR_%g.txt", TYPECELLSTRING, pcl, itofac);
     saveconditions = fopen(fileSpec2, "w");
     
     FILE *ap;
     char fileSpec3[100];
-    snprintf(fileSpec3, 100, "%saprestPCL_%g_ITO_%g.txt", TYPECELLSTRING, pcl, itofac);
+    snprintf(fileSpec3, 100, "%saprestPCL_%g_VAR_%g.txt", TYPECELLSTRING, pcl, itofac);
     ap = fopen(fileSpec3, "w");
     
     int id1, id2;
@@ -102,8 +150,11 @@ int main(int argc, char *argv[])
     id2 = 0;
     for (int i = 0; i < NCELLS; i++) {
         h_cells->VARIABLE[i] = startvar + byvar*i;
-	if (fabs(h_cells->VARIABLE[i] - 12.0) < byvar/4) {
-            id2 = i;
+        if (fabs(h_cells->VARIABLE[i] - 1.0) < byvar/4) {
+            id1 = i;
+        }
+	if (fabs(h_cells->VARIABLE[i] - 5.0) < byvar/4) {
+	    id2 = i;
 	}
 #ifdef LR1
         if (fabs(startvar + byvar*i - 0.05) < byvar/4) {

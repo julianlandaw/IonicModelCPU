@@ -14,13 +14,12 @@ stream_output = True
 
 Initialdir = /home/jlandaw/IonicModelCPU/Restitutions/APDRestitution 
 
-N = 1
+N = 200
 
-#DI1 = 1 + 100*$(process)
-#DI2 = 100 + 100*$(process)
-DI1 = 10
-DI2 = 10000
+ito = 0.05*$(Process)
+DI1 = 1
+DI2 = 1000
 pcl = 1000
 
-Arguments = 2.3 $INT(pcl) $INT(DI1) $INT(DI2) 0.05
+Arguments = $REAL(ito) $INT(pcl) $INT(DI1) $INT(DI2) 0.05
 Queue $(N)

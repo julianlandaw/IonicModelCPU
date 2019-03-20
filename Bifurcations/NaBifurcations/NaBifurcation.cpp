@@ -242,6 +242,9 @@ void NaBifurcation<typecell, ncells, beats>::dobif(long double dt, double startt
 #else
             printf("%g\t%d\t%g\t%g\t%g\n",(double)t, curbeat[0], Cells.v[0], Cells.nai[0], apds[curbeat[0]]);
 #endif
+#elif TT
+            printf("%g\t%d\t%g\t%g\t%g\t%g\n",(double)t, curbeat[0], Cells.v[0], Cells.cai[0], Cells.nai[0], apds[curbeat[0]]);
+
 #else
             printf("%g\t%d\t%g\n",(double)t, curbeat[0], Cells.v[0]);
 #endif

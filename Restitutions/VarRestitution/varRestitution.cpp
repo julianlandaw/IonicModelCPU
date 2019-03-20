@@ -78,6 +78,7 @@ void varRestitution<typecell, ncells, beats>::iterate(const int id, long double 
     if (S2[id] < 0) {
         double vold = AllCells.v[id];
         double restst = ((fmod((t + dt/4.0), basepcl) < (stimduration - dt/4.0)) && (t < startt + basepcl/2)) ? stimulus : 0.0;
+        //double restst = (t > basepcl - dt/4.0 && t < basepcl + stimduration - dt/4.0) ? stimulus : 0.0;
         AllCells.stepdt(id, dt, restst);
         double vnew = AllCells.v[id];
         if (vold >= threshold && vnew < threshold) {
@@ -109,7 +110,7 @@ void varRestitution<typecell, ncells, beats>::setup(FILE* ap)
         double vnew = CommonCell.v[0];
         if (vold >= threshold && vnew < threshold) {
             curbeat += 1;
-            printf("%d\n", curbeat);
+            printf("%d\t%g\n", curbeat, (double)commont);
         }
         commont = commont + commondt;
         if (commont > t_save) {

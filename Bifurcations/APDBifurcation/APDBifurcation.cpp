@@ -71,6 +71,16 @@ APDBifurcation<typecell, ncells, beats>::APDBifurcation() {
     }
 #endif
 
+#ifdef OHara
+    for (i = 0; i < 2*ncells*beats; i++) {
+        //kis[i] = 0;
+        nais[i] = 0;
+        cais[i] = 0;
+        cass[i] = 0;
+        //casrs[i] = 0;
+    }
+#endif
+
 #ifdef LR2
     for (i = 0; i < 2*ncells*beats; i++) {
         kis[i] = 0;
@@ -150,6 +160,15 @@ void APDBifurcation<typecell, ncells, beats>::iterate(const int id, long double 
             }
 #endif
 #endif
+#ifdef OHara
+			if (curbeat[id] >= -1 && curbeat[id] < beats - 1) {
+                //kis[2*(beats*id + curbeat[id] + 1)] = Cells.ki[id];
+                nais[2*(beats*id + curbeat[id] + 1)] = Cells.nai[id];
+                cais[2*(beats*id + curbeat[id] + 1)] = Cells.cai[id];
+                cass[2*(beats*id + curbeat[id] + 1)] = Cells.cass[id];
+                //casrs[2*(beats*id + curbeat[id] + 1)] = Cells.casr[id];
+            }
+#endif
 #ifdef LR2
             if (curbeat[id] >= -1 && curbeat[id] < beats - 1) {
                 kis[2*(beats*id + curbeat[id] + 1)] = Cells.ki[id];
@@ -192,6 +211,13 @@ void APDBifurcation<typecell, ncells, beats>::iterate(const int id, long double 
             cass[2*(beats*id + curbeat[id]) + 1] = Cells.cs[id];
             //casrs[2*(beats*id + curbeat[id]) + 1] = Cells.casr[id];
 #endif
+#ifdef OHara
+            //kis[2*(beats*id + curbeat[id]) + 1] = Cells.ki[id];
+            nais[2*(beats*id + curbeat[id]) + 1] = Cells.nai[id];
+            cais[2*(beats*id + curbeat[id]) + 1] = Cells.cai[id];
+            cass[2*(beats*id + curbeat[id]) + 1] = Cells.cass[id];
+            //casrs[2*(beats*id + curbeat[id]) + 1] = Cells.casr[id];
+#endif
 #ifdef LR2
             kis[2*(beats*id + curbeat[id]) + 1] = Cells.ki[id];
             nais[2*(beats*id + curbeat[id]) + 1] = Cells.nai[id];
@@ -224,20 +250,28 @@ template <template<int> class typecell, int ncells, int beats>
 void APDBifurcation<typecell, ncells, beats>::dobif(long double dt, double startt) {
     long double t = startt;
     long double t_save = 0;
+    double dum;
     while (donebifurcation < ncells) {
         iterateall(dt, t);
         t = t + dt;
-        if (t > stimtime[0] - dt/4.0 && t < stimtime[0] + 3*dt/4.0) {
+        if ((t > stimtime[0] - dt/4.0 && t < stimtime[0] + 3*dt/4.0)) {
+	//if (fmod(t, 10000) < dt || (t > stimtime[0] - dt/4.0 && t < stimtime[0] + 3*dt/4.0)) {
 #ifdef LR2
-            printf("%g\t%d\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",(double)t,curbeat[0],Cells.v[0],Cells.cai[0],Cells.nai[0],Cells.ki[0],Cells.jsr[0],Cells.nsr[0],Cells.tcicr[0]);
+            printf("%g\t%d\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",(double)t,curbeat[0],Cells.v[0],Cells.cai[0],Cells.nai[0],Cells.ki[0],Cells.jsr[0],Cells.nsr[0],Cells.tcicr[0], apds[curbeat[0]]);
 #elif UCLA
 #ifdef xiaodong
             printf("%g\t%d\t%g\t%g\t%g\t%g\t%g\t%g\t%g\n",(double)t, curbeat[0], Cells.v[0], Cells.nai[0], Cells.ci[0], Cells.cs[0], Cells.cj[0], Cells.cjp[0], apds[curbeat[0]]);
 #else
             printf("%g\t%d\t%g\t%g\t%g\n",(double)t, curbeat[0], Cells.v[0], Cells.nai[0], apds[curbeat[0]]);
 #endif
+#elif OHara
+	    printf("%g\t%d\t%g\t%g\t%g\t%g\t%g\n", (double)t, curbeat[0], Cells.v[0], Cells.cai[0], Cells.cass[0], Cells.nai[0], apds[curbeat[0]]);
+
+#elif TT
+	    printf("%g\t%d\t%g\t%g\t%g\t%g\n",(double)t, curbeat[0],Cells.v[0],Cells.cai[0],Cells.nai[0], apds[curbeat[0]]);
+
 #else
-            printf("%g\t%d\t%g\n",(double)t, curbeat[0], Cells.v[0]);
+            printf("%g\t%d\t%g\t%g\n",(double)t, curbeat[0], Cells.v[0], apds[curbeat[0]]);
 #endif
             t_save = t_save + pcls[0];
         }

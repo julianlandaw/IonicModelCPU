@@ -14,13 +14,20 @@ stream_output = True
 
 Initialdir = /home/jlandaw/IonicModelCPU/Bifurcations/NaBifurcations
 
-N = 51
-startna = 12
-endna = 2
-ito = 2.2
-naca = 0.05*$(Process)
-pcl = 600
+#N = 51
+#N = 3
+startna = 8
+endna = 18
+ito = 5
+naca = 0.5
+#ito = 2.2
+#naca = 0.05*$(Process)
+pcl = 900
 
 Arguments = $REAL(startna) $REAL(endna) $REAL(ito) $REAL(ito) $REAL(naca) $REAL(naca) $INT(pcl) $INT(pcl) 0.05
 
-Queue $(N)
+Queue 1
+
+Arguments = $REAL(endna) $REAL(startna) $REAL(ito) $REAL(ito) $REAL(naca) $REAL(naca) $INT(pcl) $INT(pcl) 0.05
+
+Queue 1

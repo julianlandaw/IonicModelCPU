@@ -16,7 +16,7 @@ LR1ap:
 	$(CC) $(FLAGS) $(OBJECTS) -o LR1$(EXECUTABLE) $(MACROS) -D LR1
 
 TTap:
-	$(CC) $(FLAGS) $(OBJECTS) -o TT$(EXECUTABLE) $(MACROS) -D TT -D clampki
+	$(CC) $(FLAGS) $(OBJECTS) -o TT$(EXECUTABLE) $(MACROS) -D TT -D clampki -D xiaodong
 
 UCLAap:
 	$(CC) $(FLAGS) $(OBJECTS) -o UCLA$(EXECUTABLE) $(MACROS) -D UCLA -D noslowito

@@ -14,20 +14,34 @@ stream_output = True
 
 Initialdir = /home/jlandaw/IonicModelCPU/Bifurcations/APDBifurcation 
 
-N = 101*101
-O = ($(Process) / 101)
-P = ($(Process) % 101)
-ito1 = 0.05*$(O)
-ito2 = $(ito1)
-ical1 = 0.05*$(P)
-ical2 = $(ical1)
-
-pcl1 = 500
+N = 151*51
+O = ($(Process) % 151)
+P = ($(Process) / 151)
+isk1 = 10
+isk2 = $(isk1)
+skh1 = 0.02 + 0.02*$(P)
+skh2 = $(skh1)
+pcl1 = 40 + $(O)
 pcl2 = $(pcl1)
 
-Arguments = $REAL(ito1) $REAL(ito2) $REAL(ical1) $REAL(ical2) $INT(pcl1) $INT(pcl2) 0.05
+Arguments = $REAL(isk1) $REAL(isk2) $REAL(skh1) $REAL(skh2) $REAL(pcl1) $REAL(pcl2) 0.05
 
 Queue $(N)
+
+#N = 101*101
+#O = ($(Process) / 101)
+#P = ($(Process) % 101)
+#ito1 = 0.05*$(O)
+#ito2 = $(ito1)
+#ical1 = 0.05*$(P)
+#ical2 = $(ical1)
+
+#pcl1 = 500
+#pcl2 = $(pcl1)
+
+#Arguments = $REAL(ito1) $REAL(ito2) $REAL(ical1) $REAL(ical2) $INT(pcl1) $INT(pcl2) 0.05
+
+#Queue $(N)
 
 #N = 101*101
 #O = ($(Process) % 101)

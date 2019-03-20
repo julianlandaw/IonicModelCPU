@@ -43,6 +43,14 @@ public:
     //PRECTYPE casrs[2*ncells*beats];
 #endif
 
+#ifdef OHara
+    //PRECTYPE kis[2*ncells*beats];
+    PRECTYPE nais[2*ncells*beats];
+    PRECTYPE cais[2*ncells*beats];
+    PRECTYPE cass[2*ncells*beats];
+    //PRECTYPE casrs[2*ncells*beats];
+#endif
+
 #ifdef LR2
     PRECTYPE kis[2*ncells*beats];
     PRECTYPE nais[2*ncells*beats];

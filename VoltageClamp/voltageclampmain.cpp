@@ -104,7 +104,14 @@ int main(int argc, char *argv[])
     VoltageClamp<TYPECELL, 1, BEATS>* h_cells;
     
     h_cells = new VoltageClamp<TYPECELL, 1, BEATS>();
-    
+#ifdef TT
+    h_cells->Cells.itofac[0] = 0.0;
+    h_cells->Cells.iskfac[0] = 0.0;
+    h_cells->Cells.ikrfac[0] = 0.0;
+    h_cells->Cells.iksfac[0] = 0.5;
+    h_cells->Cells.nacafac[0] = 5.0;
+    h_cells->Cells.ibarcafac[0] = 0.8;
+#endif 
     h_cells->commondt = dt;
     /*
     for (int i = 0; i < numpcl; i++) {

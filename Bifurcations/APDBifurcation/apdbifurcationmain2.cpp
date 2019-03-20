@@ -51,6 +51,11 @@
 #define TYPECELLSTRING "TT"
 #include "Cells/TTCellIto.cpp"
 
+#elif TP06
+#define TYPECELL TP06Cell
+#define TYPECELLSTRING "TP06"
+#include "Cells/TP06Cell.cpp"
+
 #elif LR1
 #define TYPECELL LR1CellIto
 #define TYPECELLSTRING "LR1"
@@ -140,37 +145,47 @@ int main(int argc, char *argv[])
     const long double dt = atof(argv[7]);
     
     	#ifdef LR1
-    double _itofac = 0;
-    double _icalfac = 1.0; //1.15; //1.0;
+    double _itofac = 0.0; //1.0;
+    double _icalfac = 1.0; //1.15; //1.0; //1.15; //1.0;
     double _ikfac = 1.0;
-    double _ikifac = 1.0; //2.2; //1.0;
-    double _tauXfac = 1.0; //5.0;
-    double _yshift = 0.0; //8.0; //-8.0;
+    double _ikifac = 1.0; //2.2; //1.0; //2.2; //1.0;
+    double _tauXfac = 1.0; //5.0; //5.0;
+    double _yshift = -8.0; //8.0; //-8.0; //8.0; //-8.0;
         #endif 
         #ifdef LR2
     double _itofac = 0.0;
     double _iskfac = 0.0;
-    double _iupfac = 1.0;
-    double _skh = 0.0025;
+    double _iupfac = 3.0; //3.0; //3.0;
+    double _skh = 0.002; //0.0025
+    double _tauyfac = 1.0;
+    //double _nai = 20.0;
+    //double _ki = 134.2;
         #endif
         #ifdef TT
     double _itofac = 0.0;
     double _iskfac = 0.0;
     double _nai = 12.0;
     double _ki = 138.0;
-    double _nacafac = 5.75;
+    double _nacafac = 1.0; //5.75;
 
-    double _ikrfac = 1.0;
-    double _iksfac = 1.0;
+    double _ikrfac = 0.0; //1.0;
+    double _iksfac = 0.5;
     double _icalfac = 1.0;
     //double _ikrfac = 0.01/(gkr);  //1.0;
     //double _iksfac = 0.036/(gks); //1.0;
     //double _icalfac = 0.0006/(gcal); //1.0;
         #endif
         #ifdef OHara
-    double _itofac = 0.0;
+    double _itofac = 0.0; //0.0; //2.0;
     double _iskfac = 0.0;
-    double _inafac = 2.0; 
+    double _skh = 0.001; //0.0005; //0.006;
+    double _inafac = 2.0; //2.0; //2.0;
+    double _nai = 7.92; //8.73; 
+    double _ki = 146.0;
+    double _vssfac = 1.0;
+    double _alphask = 0.1; //0.1; //0.1;
+    double _ikrfac = 1.0;
+    double _iksfac = 1.0;
         #endif
         #ifdef UCLA
     double _itofac = 1.0;
@@ -179,8 +194,8 @@ int main(int argc, char *argv[])
     double _icalfac = 1.0;
     double _ikrfac = 1.0;
     double _iksfac = 1.0;
-    double _nai = 16.0;
-    double _nacafac = 0.3;
+    double _nai = 12.0;
+    double _nacafac = 0.3;//1.0;
         #endif
     
     double byvar1 = (numvar1 > 1) ? (maxvar1 - minvar1)/(numvar1 - 1) : 1;
@@ -254,7 +269,24 @@ int main(int argc, char *argv[])
     char fileSpec5[100];
     snprintf(fileSpec5, 100, "%snaiPCL_%g_VAR1_%g_VAR2_%g.txt", TYPECELLSTRING, minpcl, minvar1,minvar2);
     naibifs = fopen(fileSpec5, "w");
-#endif    
+#endif  
+
+#ifdef OHara
+    FILE *caibifs;
+    char fileSpec2[100];
+    snprintf(fileSpec2, 100, "%scaiPCL_%g_VAR1_%g_VAR2_%g.txt", TYPECELLSTRING, minpcl, minvar1,minvar2);
+    caibifs = fopen(fileSpec2, "w");
+    
+    FILE *cassbifs;
+    char fileSpec3[100];
+    snprintf(fileSpec3, 100, "%scassPCL_%g_VAR1_%g_VAR2_%g.txt", TYPECELLSTRING, minpcl, minvar1,minvar2);
+    cassbifs = fopen(fileSpec3, "w");
+    
+    FILE *naibifs;
+    char fileSpec5[100];
+    snprintf(fileSpec5, 100, "%snaiPCL_%g_VAR1_%g_VAR2_%g.txt", TYPECELLSTRING, minpcl, minvar1,minvar2);
+    naibifs = fopen(fileSpec5, "w");
+#endif  
     
 #ifdef LR2
     FILE *caibifs;
@@ -312,6 +344,9 @@ int main(int argc, char *argv[])
                 h_cells->Cells.iskfac[index] = _iskfac;
                 h_cells->Cells.iupfac[index] = _iupfac;
                 h_cells->Cells.skh[index] = _skh;
+		h_cells->Cells.tauyfac[index] = _tauyfac;
+		//h_cells->Cells.nai[index] = _nai;
+		//h_cells->Cells.ki[index] = _ki;
             #endif
             #ifdef TT
                 h_cells->Cells.itofac[index] = _itofac;
@@ -329,6 +364,15 @@ int main(int argc, char *argv[])
                 h_cells->Cells.itofac[index] = _itofac;//0.0;
                 h_cells->Cells.iskfac[index] = _iskfac;//0.0;
                 h_cells->Cells.inafac[index] = _inafac; //2.0;
+		h_cells->Cells.skh[index] = _skh;
+		h_cells->Cells.nai[index] = _nai;
+		h_cells->Cells.nass[index] = _nai;
+		h_cells->Cells.ki[index] = _ki;
+		h_cells->Cells.kss[index] = _ki;
+		h_cells->Cells.ikrfac[index] = _ikrfac;
+		h_cells->Cells.iksfac[index] = _iksfac;
+		h_cells->Cells.vssfac[index] = _vssfac;
+		h_cells->Cells.alphask[index] = _alphask;
 #endif
 #ifdef UCLA
                 h_cells->Cells.itofac[index] = _itofac; //0.0;
@@ -351,6 +395,10 @@ int main(int argc, char *argv[])
                 h_cells->Cells.VARIABLE1[index] = byvar1*j + minvar1;
                 h_cells->Cells.VARIABLE2[index] = byvar2*k + minvar2;
                 h_cells->pcls[index] = bypcl*i + minpcl;
+#ifdef OHara
+		h_cells->Cells.nass[index] = h_cells->Cells.nai[index];
+		h_cells->Cells.kss[index] = h_cells->Cells.ki[index];
+#endif
             }
         }
     }
@@ -420,7 +468,21 @@ int main(int argc, char *argv[])
                 fprintf(caibifs, "\n");
                 fprintf(naibifs, "\n");
                 fprintf(cassbifs, "\n");
-#endif                
+#endif
+
+#ifdef OHara
+                fprintf(caibifs, "%g\t%g\t%g", bypcl*i + minpcl, byvar1*j + minvar1, byvar2*k + minvar2);
+                fprintf(naibifs, "%g\t%g\t%g", bypcl*i + minpcl, byvar1*j + minvar1, byvar2*k + minvar2);
+                fprintf(cassbifs, "%g\t%g\t%g", bypcl*i + minpcl, byvar1*j + minvar1, byvar2*k + minvar2);
+                for (int l = 2*REMOVEBEATS; l < 2*BEATS; l++) {
+                    fprintf(caibifs, "\t%g", h_cells->cais[2*BEATS*(index) + l]);
+                    fprintf(naibifs, "\t%g", h_cells->nais[2*BEATS*(index) + l]);
+                    fprintf(cassbifs, "\t%g", h_cells->cass[2*BEATS*(index) + l]);
+                }
+                fprintf(caibifs, "\n");
+                fprintf(naibifs, "\n");
+                fprintf(cassbifs, "\n");
+#endif                 
                 
 #ifdef LR2
                 fprintf(caibifs, "%g\t%g\t%g", bypcl*i + minpcl, byvar1*j + minvar1, byvar2*k + minvar2);
@@ -473,6 +535,11 @@ int main(int argc, char *argv[])
     fclose(naibifs);
 #endif
 #ifdef UCLA
+    fclose(caibifs);
+    fclose(naibifs);
+    fclose(cassbifs);
+#endif
+#ifdef OHara
     fclose(caibifs);
     fclose(naibifs);
     fclose(cassbifs);

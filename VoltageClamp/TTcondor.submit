@@ -14,17 +14,17 @@ stream_output = True
 
 Initialdir = /home/jlandaw/IonicModelCPU/VoltageClamp
 
-maxO = 7
-maxP = 7
+maxO = 10
+maxP = 10
 N = $(maxO)*$(maxP)
 O = ($(Process) / $(maxO))
 P = ($(Process) % $(maxO))
 
-apd1 = 50 + 50*$(O)
-apd2 = 50 + 50*$(P)
+apd1 = 500 + 100*$(O)
+apd2 = 500 + 100*$(P)
 
-pcl = 3000
+pcl = 2750
 
-Arguments = $INT(pcl) $INT(apd1) $INT(apd2) 0.025
+Arguments = $INT(pcl) $INT(apd1) $INT(apd2) 0.05
 Queue $(N)
 

@@ -111,8 +111,12 @@ void APDRestitution<typecell, ncells, beats>::setup(FILE* ap)
             while (stimtime < commont - commondt/4.0) {
                stimtime += basepcl;
             }
-            printf("%d\n", curbeat);
-        }
+#ifdef LR1
+            printf("%g\t%g\t%g\t%g\t%d\n", (double)commont, CommonCell.v[0], CommonCell.itofac[0], CommonCell.yshift[0], curbeat);
+#else
+	    printf("%g\t%g\t%g\t%d\n", (double)commont, CommonCell.v[0], CommonCell.itofac[0], curbeat);
+#endif
+	}
         commont = commont + commondt;
         if (commont > t_save) {
             fprintf(ap,"%g\t%g",(double)commont,CommonCell.v[0]);

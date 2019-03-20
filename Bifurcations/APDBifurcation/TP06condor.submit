@@ -1,5 +1,5 @@
 Universe   = vanilla
-Executable = UCLAbif.out
+Executable = TP06bif.out
 
 Request_Memory = 128
 
@@ -14,15 +14,17 @@ stream_output = True
 
 Initialdir = /home/jlandaw/IonicModelCPU/Bifurcations/APDBifurcation
 
-N = 2901
-#ito = 2.2
-#naca = 0.05*$(Process)
-pcl = 100 + $(Process)
-ical = 5
-isk = 0.5
-#isk = 0.1*$(Process)
+N = 201
+ical = 10
+naca = 1
+pcl = 50 + 5*$(Process)
+Arguments = $REAL(ical) $REAL(ical) $REAL(naca) $REAL(naca) $INT(pcl) $INT(pcl) 0.05
+
+#N = 51
+#ito = 0.9
+#naca = 0.1*$(Process)
+#pcl = 1200
 
 #Arguments = $REAL(ito) $REAL(ito) $REAL(naca) $REAL(naca) $INT(pcl) $INT(pcl) 0.05
-Arguments = $REAL(ical) $REAL(ical) $REAL(isk) $REAL(isk) $INT(pcl) $INT(pcl) 0.05
 
 Queue $(N)

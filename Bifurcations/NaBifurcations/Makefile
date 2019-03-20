@@ -57,7 +57,7 @@ LR2SKbif:
 	$(CC) $(FLAGS) $(OBJECTS) -o LR2SK$(EXECUTABLE) $(BIFMACROS2) -D LR2 -D VARIABLE1=${SKVARIABLE1} -D VARIABLE2=${SKVARIABLE2} -D SK -D UCLAito -D stimulus=-38.0 -D stimduration=2.0
 
 TTbif:
-	$(CC) $(FLAGS) $(OBJECTS) -o TT$(EXECUTABLE) $(BIFMACROS2) -D TT -D VARIABLE1=${VARIABLE1} -D VARIABLE2=${VARIABLE2} -D noslowito -D clampki -D gnaped=${gnaped} -D stimulus=-26.0 -D stimduration=2.0
+	$(CC) $(FLAGS) $(OBJECTS) -o TT$(EXECUTABLE) $(BIFMACROS2) -D TT -D VARIABLE1=${VARIABLE1} -D VARIABLE2=${VARIABLE2} -D noslowito -D clampki -D xiaodong -D gnaped=${gnaped} -D stimulus=-26.0 -D stimduration=2.0
 TTModbif:
 	$(CC) $(FLAGS) $(OBJECTS) -o TTMod$(EXECUTABLE) $(BIFMACROS2) -D TTMod -D stimulus=-26.0 -D stimduration=2.0
 

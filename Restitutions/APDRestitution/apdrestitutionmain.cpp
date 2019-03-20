@@ -24,6 +24,12 @@
 #define TYPECELLSTRING "TT"
 #define gnaped 0.01
 #include "Cells/TTCellIto.cpp"
+
+#elif TP06
+#define TYPECELL TP06Cell
+#define TYPECELLSTRING "TP06"
+#include "Cells/TP06Cell.cpp"
+
 #elif LR1
 #define TYPECELL LR1CellIto
 #define TYPECELLSTRING "LR1"
@@ -44,6 +50,10 @@
 #define TYPECELL LR1CellMod
 #define TYPECELLSTRING "LR1Mod"
 #include "Cells/LR1CellItoMod.cpp"
+#elif OHara
+#define TYPECELL OHaraCell
+#define TYPECELLSTRING "OHara"
+#include "Cells/OHaraCell.cpp"
 #else
 #define TYPECELL TTCellMod
 #define TYPECELLSTRING "TTMod"
@@ -87,18 +97,20 @@ int main(int argc, char *argv[])
     
 #ifdef LR2
     h_cells->CommonCell.itofac[0] = 0;
-    h_cells->CommonCell.iskfac[0] = 20.0;
+    h_cells->CommonCell.iskfac[0] = 0.0; //20.0;
     h_cells->CommonCell.skh[0] = 0.0025;
-    h_cells->CommonCell.iupfac[0] = 3.0;
+    h_cells->CommonCell.iupfac[0] = 1.0; // 3.0;
+    h_cells->CommonCell.tauyfac[0] = 1.0;
 #endif
     
 #ifdef LR1
     h_cells->CommonCell.tauXfac[0] = 1.0;
-    h_cells->CommonCell.yshift[0] = -8.0;
+    h_cells->CommonCell.yshift[0] = -8.0; //-8.0; //0.0;
     h_cells->CommonCell.itofac[0] = 0.0;
     h_cells->CommonCell.icalfac[0] = 1.0;
     h_cells->CommonCell.ikfac[0] = 1.0;
     h_cells->CommonCell.ikifac[0] = 1.0;
+    h_cells->CommonCell.itoslowfac[0] = 0.0;
 #endif
 #ifdef TT
 #ifdef clampnai
@@ -112,7 +124,18 @@ int main(int argc, char *argv[])
     //h_cells->CommonCell.iksfac[0] = 0.036/(gks);
     
 #endif
+#ifdef OHara
+    h_cells->CommonCell.skh[0] = 0.006;
+    h_cells->CommonCell.iskfac[0] = 0.0;
+    h_cells->CommonCell.inafac[0] = 2.0;
+    h_cells->CommonCell.itofac[0] = 0.0;
+    h_cells->CommonCell.nai[0] = 9.0;
+    h_cells->CommonCell.nass[0] = h_cells->CommonCell.nai[0];
+    h_cells->CommonCell.yshift[0] = -8.0;
+#endif
+        
     h_cells->CommonCell.curfac[0] = itofac;
+    printf("%g\n",h_cells->CommonCell.curfac[0]);
     h_cells->basepcl = pcl;
     h_cells->commondt = dt;
     

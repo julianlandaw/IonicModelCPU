@@ -160,11 +160,14 @@ int main(int argc, char *argv[])
     double _iskfac = 0.0;
     double _nai = 12.0;
     double _ki = 138.0;
-    double _nacafac = 5.75;
-
-    double _ikrfac = 1.0;
-    double _iksfac = 1.0;
+    double _nacafac = 1.0; //5.75;
+    double _ikrfac = 0.0;
+    double _iksfac = 0.5;
     double _icalfac = 1.0;
+
+    //double _ikrfac = 1.0;
+    //double _iksfac = 1.0;
+    //double _icalfac = 1.0;
     //double _ikrfac = 0.01/(gkr);  //1.0;
     //double _iksfac = 0.036/(gks); //1.0;
     //double _icalfac = 0.0006/(gcal); //1.0;
@@ -179,7 +182,7 @@ int main(int argc, char *argv[])
     double _iskfac = 0.0;
     double _skh = 2.0;
     double _icalfac = 1.0;
-    double _ikrfac = 1.0;
+    double _ikrfac = 1.0; //1.0;
     double _iksfac = 1.0;
     double _nai = 8.0;
     double _nacafac = 0.3;
