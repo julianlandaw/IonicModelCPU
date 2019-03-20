@@ -119,6 +119,8 @@ template <int ncells>
         ikfac[i] = IKFAC;
         ikifac[i] = IKIFAC;
         tauXfac[i] = TAUXFAC;
+        tauyslowfac[i] = 1.0;
+        typedestal[i] = 0.0;
     }
 }
 
@@ -210,6 +212,14 @@ template <int ncells>
     return ina;
 }
 
+#ifndef TAUDFAC
+#define TAUDFAC 1.0
+#endif
+
+#ifndef TAUFFAC
+#define TAUFFAC 1.0
+#endif
+
 template <int ncells>
   double LR1CellIto<ncells>::comp_ical (int id, double dt, double& dd, double& df) // L-type Calcium Current
 {
@@ -223,6 +233,8 @@ template <int ncells>
     tauf = 1.0/(af+bf);
     dss = ad*taud;
     fss = af*tauf;
+    taud = TAUDFAC*taud;
+    tauf = TAUFFAC*tauf;
     
     ical = ibarca*d[id]*f[id]*(v[id] - (7.7 - 13.0287*log(cai[id])));
     
@@ -248,6 +260,11 @@ double LR1CellIto<ncells>::comp_ito (int id, double dt, double& dxtos, double& d
     rs_inf = 1.0/(1.0 + exp(rt2));
     txs = 9.0/(1.0 + exp(-rt1)) + 0.5;
     tys = 3000.0/(1.0 + exp(rt3)) + 30.0;
+    tys = tauyslowfac[id]*tys;
+    if (tys < typedestal[id]) {
+        tys = typedestal[id];  
+    }
+    //tys = tauyslowfac[id]*tys;
     xitos = gtos*xtos[id]*(ytos[id] + 0.5*rs_inf)*(v[id] - ek);
     dxtos = (xtos_inf - (xtos_inf - xtos[id])*exp(-dt/txs) - xtos[id])/dt;
     dytos = (ytos_inf - (ytos_inf - ytos[id])*exp(-dt/tys) - ytos[id])/dt;
@@ -269,12 +286,14 @@ double LR1CellIto<ncells>::comp_ito (int id, double dt, double& dxtos, double& d
     ek = (rtf/zk)*log(ko/ki);
     
     zssdv = 1.0/(1.0 + exp((20.0 - (v[id] - zshift[id]))/6.0));
-    tauzdv = 9.5*exp(-((v[id] - zshift) + 40.0)*((v[id] - zshift[id]) + 40.0)/1800.0) + 0.8;
+    tauzdv = 9.5*exp(-((v[id] - zshift[id]) + 40.0)*((v[id] - zshift[id]) + 40.0)/1800.0) + 0.8;
                  
     yssdv = 1.0/(1.0 + exp(((v[id] - yshift[id]) + 28.0)/5.0));
     tauydv = 1000.0*exp(-((v[id] - yshift[id]) + 67.0)*((v[id] - yshift[id]) + 67.0)/1000.0) + 8.0;
+    tauydv = tauyslowfac[id]*tauydv;
     
-    ito = itoslowfac[id]*gitodv*xtos[id]*ytos[id]*(v[id]-ek);
+    //ito = itoslowfac[id]*gitodv*xtos[id]*ytos[id]*(v[id]-ek);
+    ito = itoslowfac[id]*gtof*xtos[id]*ytos[id]*(v[id]-ek);
     
     dxtos = (zssdv-(zssdv-xtos[id])*exp(-dt/tauzdv) - xtos[id])/dt; 
     dytos = (yssdv-(yssdv-ytos[id])*exp(-dt/tauydv) - ytos[id])/dt;
@@ -371,6 +390,9 @@ void LR1CellIto<ncells>::setcell (int id, LR1CellIto<1>* newcell)
     ikifac[id] = newcell->ikifac[0];
     yshift[id] = newcell->yshift[0];
     zshift[id] = newcell->zshift[0];
+    inafac[id] = newcell->inafac[0]; 
+    tauyslowfac[id] = newcell->tauyslowfac[0]; 
+    typedestal[id] = newcell->typedestal[0]; 
 }
 
 template <int ncells>
@@ -397,6 +419,9 @@ void LR1CellIto<ncells>::getcell (int id, LR1CellIto<1>* newcell)
     newcell->ikifac[0] = ikifac[id];
     newcell->yshift[0] = yshift[id];
     newcell->zshift[0] = zshift[id];
+    newcell->inafac[0] = inafac[id];
+    newcell->tauyslowfac[0] = tauyslowfac[id];
+    newcell->typedestal[0] = typedestal[id];
 }
 
 template <int ncells>

@@ -1,5 +1,5 @@
 //
-//  TTCellIto.cpp
+//  TP06Cell.cpp
 //
 //  Implementation of the ten Tusscher model, with UCLA Ito
 //  Created by Julian Landaw on 12/25/16.
@@ -7,36 +7,52 @@
 //
 #include <math.h>
 #include <fstream>
-#include "TTCellIto.h"
+#include "TP06Cell.h"
 
-#ifndef TTCellIto_cpp
-#define TTCellIto_cpp
+#ifndef TP06Cell_cpp
+#define TP06Cell_cpp
 
 #define ko 5.4
 #define cao 2.0
 #define nao 140.0
 #define vc 0.016404
 #define vsr 0.001094
-#define bufc 0.15
+#define vss 0.00005468
+#define bufc 0.2
 #define kbufc 0.001
 #define bufsr 10.0
 #define kbufsr 0.3
+#define bufss 0.4
+#define kbufss 0.00025
 #define taufca 2.0
 #define taug 2.0
-#define vmaxup 0.000425
+#define vmaxup 0.006375
 #define kup 0.00025
+//#define capacitance 1.0
 #define capacitance 0.185
-#define gitodv 0.2
-#define gkr 0.096
-#define gks 0.245
+#ifdef ENDO
+#define Gto 0.073
+#else
+#define Gto 0.294
+#endif
+
+#define gkr 0.153
+
+#ifdef MCELL
+#define gks 0.098
+#else
+#define gks 0.392
+#endif
+
 #define pkna 0.03
 #define gk1 5.405
 #define gna 14.838
 #define gbna 0.00029
 #define kmk 1.0
 #define kmna 40.0
-#define knak 1.362
-#define gcal 0.000175
+//#define knak 1.362
+#define knak 2.724
+#define gcal 0.0000398
 #define gbca 0.000592
 #define knaca 1000.0
 #define kmnai 87.5
@@ -50,7 +66,16 @@
 #define arel 0.016464
 #define brelsq 0.0625
 #define crel 0.008232
-#define vleak 0.00008
+#define vleak 0.00036
+#define vxfer 0.0038
+#define vrel 40.8
+#define EC 1.5
+#define maxsr 2.5
+#define minsr 1.0
+#define k1p 0.15
+#define k2p 0.045
+#define k3 0.060
+#define k4 0.000015
 
 #define R 8314.472
 #define frdy 96485.3415
@@ -85,13 +110,14 @@
 #endif
 
 template <int ncells>
-TTCellIto<ncells>::TTCellIto()
+TP06Cell<ncells>::TP06Cell()
 {
     for (int i = 0; i < ncells; i++) {
         v[i] = -86.2;
         nai[i] = 11.6;
         ki[i] = 138.3;
         cai[i] = 0.0002;
+        cass[i] = 0.0002;
         casr[i] = 0.2;
         m[i] = 0.0;
         h[i] = 0.75;
@@ -101,8 +127,9 @@ TTCellIto<ncells>::TTCellIto()
         xs[i] = 0.0;
         d[i] = 0.0;
         f[i] = 1.0;
+        f2[i] = 1.0;
         fca[i] = 1.0;
-        g[i] = 1.0;
+        rbar[i] = 1.0;
         zdv[i] = 0.0;
         ydv[i] = 1.0;
         diffcurrent[i] = 0.0;
@@ -140,13 +167,13 @@ TTCellIto<ncells>::TTCellIto()
 }
 
 template <int ncells>
-bool TTCellIto<ncells>::iterate(const int id, double dt, double st, double dv_max) {
-    double dm, dh, dj, dd, df, dfca, dzdv, dydv, dxs, dxr1, dxr2, dg;
-    double dcai, dcasr, dnai, dki, dv;
+bool TP06Cell<ncells>::iterate(const int id, double dt, double st, double dv_max) {
+    double dm, dh, dj, dd, df, df2, dfca, dzdv, dydv, dxs, dxr1, dxr2, drbar;
+    double dcai, dcasr, dcass, dnai, dki, dv;
     double ina, ical, ito, iks, isk, ikr, ik1, inaca, inak, ipca, ipk, ibna, ibca;
     
     ina = comp_ina(id, dt, dm, dh, dj);         // fast sodium current
-    ical = comp_ical(id, dt, dd, df, dfca);     // window current
+    ical = comp_ical(id, dt, dd, df, df2, dfca);     // window current
     ito = comp_ito(id, dt, dzdv, dydv);         // UCLA Ito current
     isk = comp_isk(id);                         // SK current
     iks = comp_iks(id, dt, dxs);                // Slow rectifying K current
@@ -158,12 +185,12 @@ bool TTCellIto<ncells>::iterate(const int id, double dt, double st, double dv_ma
     ipca = comp_ipca(id);                       // Background Ca current
     ibca = comp_ibca(id);                       // ... Another background Ca current
     ibna = comp_ibna(id);                       // Background Na current
-    dv = (diffcurrent[id] - (ikr + iks + isk + ik1 + ito + ina + ibna + ical + ibca + inak + inaca + ipca + ipk + st))*dt;
+    dv = (diffcurrent[id] - (ikr + iks + isk + ik1 + ito + ina + ibna + ical + ibca + inak + inaca + ipca + ipk + st))/2.0*dt;
     
     // Comment out if one would like to avoid using a dynamic step size that checks for dv being too big
     if (dv_max > 0 && dv*dv > dv_max*dv_max) {return false;}
     
-    comp_calcdyn(id, dt, ical, ibca, ipca, inaca, dg, dcasr, dcai);
+    comp_calcdyn(id, dt, ical, ibca, ipca, inaca, drbar, dcasr, dcai, dcass);
 
     if (!naiclamped[id]) {
         dnai = -(ina + ibna + 3.0*inak + 3.0*inaca)/(vc*frdy)*capacitance;
@@ -180,15 +207,17 @@ bool TTCellIto<ncells>::iterate(const int id, double dt, double st, double dv_ma
     j[id] += dj*dt;
     d[id] += dd*dt;
     f[id] += df*dt;
+    f2[id] += df2*dt;
     fca[id] += dfca*dt;
     zdv[id] += dzdv*dt;
     ydv[id] += dydv*dt;
     xs[id] += dxs*dt;
     xr1[id] += dxr1*dt;
     xr2[id] += dxr2*dt;
-    g[id] += dg*dt;
+    rbar[id] += drbar*dt;
     cai[id] += dcai*dt;
     casr[id] += dcasr*dt;
+    cass[id] += dcass*dt;
     //nai[id] += dnai*dt;
     //ki[id] += dki*dt;
     
@@ -196,7 +225,7 @@ bool TTCellIto<ncells>::iterate(const int id, double dt, double st, double dv_ma
 }
 
 template <int ncells>
-void TTCellIto<ncells>::stepdt (const int id, double dt, double st) {
+void TP06Cell<ncells>::stepdt (const int id, double dt, double st) {
     if (id > -1 && id < ncells) {
         bool success = iterate(id, dt, st, DV_MAX);
         if (!success) {
@@ -212,7 +241,7 @@ void TTCellIto<ncells>::stepdt (const int id, double dt, double st) {
 #endif
 
 template <int ncells>
-double TTCellIto<ncells>::comp_ina (int id, double dt, double& dm, double& dh, double& dj) //Fast Sodium Current
+double TP06Cell<ncells>::comp_ina (int id, double dt, double& dm, double& dh, double& dj) //Fast Sodium Current
 {
     double ena, mtau, htau, jtau, mss, hss, ina;
     
@@ -246,7 +275,7 @@ double TTCellIto<ncells>::comp_ina (int id, double dt, double& dm, double& dh, d
 }
 
 template <int ncells>
-double TTCellIto<ncells>::comp_ical (int id, double dt, double& dd, double& df, double& dfca) // L-type Calcium Current
+double TP06Cell<ncells>::comp_ical (int id, double dt, double& dd, double& df, double& df2, double& dfca) // L-type Calcium Current
 {
 #ifdef xiaodong    
     double taud, tauf, dss, fss, fcass, ical, vfrt;
@@ -276,7 +305,48 @@ double TTCellIto<ncells>::comp_ical (int id, double dt, double& dd, double& df, 
         ical = ibarcafac[id]*gcal*d[id]*f[id]*fcass*zca*frdy*vfrt*(cai[id]*exp(vfrt) - 0.341*cao)/(exp(vfrt) - 1.0);
     }
 #else    
+    double dss, taud, alphad, betad, gammad;
+    double fss, tauf, alphaf, betaf, gammaf;
+    double f2ss, tauf2, alphaf2, betaf2, gammaf2;
+    double fcassinf, taufcass;
+    double ical, vfrt;
     
+    alphad = 1.4/(1.0 + exp((-35.0 - v[id])/13)) + 0.25;
+    betad = 1.4/(1.0 + exp((v[id]+5.0)/5.0));
+    gammad = 1.0/(1.0 + exp((50.0 - v[id])/20.0));
+    taud = alphad*betad + gammad;
+    dss = 1.0/(1.0 + exp((-8.0 - v[id])/7.5));
+    
+    fss = 1.0/(1.0 + exp((v[id] + 20.0)/7.0));
+    alphaf = 1102.5*exp(-((v[id] + 27.0)/15.0)*((v[id] + 27.0)/15.0));
+    betaf = 200.0/(1.0 + exp((13.0 - v[id])/10.0));
+    gammaf = 180.0/(1.0 + exp((v[id] + 30.0)/10.0));
+    tauf = alphaf + betaf + gammaf;
+    
+    f2ss = 0.67/(1.0 + exp((v[id] + 35.0)/7.0)) + 0.33;
+    alphaf2 = 600.0*exp(-((v[id] + 25.0)*(v[id] + 25.0)/170.0));
+    betaf2 = 31.0/(1.0 + exp((25.0 - v[id])/10.0));
+    gammaf2 = 16.0/(1.0 + exp((v[id] + 30.0)/10.0));
+    tauf2 = alphaf2 + betaf2 + gammaf2;
+    
+    fcassinf = 0.6/(1.0 + (cass[id]/0.05)*(cass[id]/0.05)) + 0.4;
+    taufcass = 80.0/(1.0 + (cass[id]/0.05)*(cass[id]/0.05)) + 2.0;
+    
+    vfrt = (v[id] - 15.0)*zca*frt;
+    
+    if (fabs(vfrt) < 1e-3) {
+        ical = ibarcafac[id]*gcal*d[id]*f[id]*f2[id]*fca[id]*zca*frdy*(0.25*cass[id]*exp(vfrt) - cao)/(1.0 + vfrt/2.0 + vfrt*vfrt/6.0 + vfrt*vfrt*vfrt/24.0);
+    }
+    else {
+        ical = ibarcafac[id]*gcal*d[id]*f[id]*f2[id]*fca[id]*zca*frdy*vfrt*(0.25*cass[id]*exp(vfrt) - cao)/(exp(vfrt) - 1.0);
+    }
+    
+    dd = (dss-(dss-d[id])*exp(-dt/taud) - d[id])/dt;
+    df = (fss-(fss-f[id])*exp(-dt/tauf) - f[id])/dt;
+    df2 = (f2ss-(f2ss-f[id])*exp(-dt/tauf2) - f2[id])/dt;
+    dfca = (fcassinf - (fcassinf - fca[id])*exp(-dt/taufcass) - fca[id])/dt;
+    
+    /*
     double taud, tauf, dss, fss, fcass, ical, vfrt;
     
     taud = (1.4/(1.0 + exp((-35.0-v[id])/13.0)) + 0.25)*(1.4/(1.0 + exp((v[id]+5.0)/5.0))) + 1.0/(1.0 + exp((50.0-v[id])/20.0));
@@ -298,12 +368,14 @@ double TTCellIto<ncells>::comp_ical (int id, double dt, double& dd, double& df, 
     dd = (dss-(dss-d[id])*exp(-dt/taud) - d[id])/dt;
     df = (fss-(fss-f[id])*exp(-dt/tauf) - f[id])/dt;
     dfca = (fcass > fca[id] && v[id] > -60.0) ? 0.0 : (fcass - (fcass - fca[id])*exp(-dt/taufca) - fca[id])/dt;
+*/
 #endif    
+
     return ical;
 }
 
 template <int ncells>
-double TTCellIto<ncells>::comp_ito (int id, double dt, double& dzdv, double& dydv)
+double TP06Cell<ncells>::comp_ito (int id, double dt, double& dzdv, double& dydv)
 {
     #ifdef UCLAito
     double ek, zssdv, tauzdv, yssdv, tauydv, ito;
@@ -316,40 +388,35 @@ double TTCellIto<ncells>::comp_ito (int id, double dt, double& dzdv, double& dyd
     yssdv = 1.0/(1.0+exp((v[id] +33.5)/10.0));
     tauydv = 20.0/(1.0+exp((v[id] +33.5)/10.0)) + 20.0;
     
-    ito = itofac[id]*gitodv*zdv[id]*ydv[id]*(v[id]-ek);
+    ito = itofac[id]*Gto*zdv[id]*ydv[id]*(v[id]-ek);
     
     dzdv = (zssdv-(zssdv-zdv[id])*exp(-dt/tauzdv) - zdv[id])/dt;
     dydv = (yssdv-(yssdv-ydv[id])*exp(-dt/tauydv) - ydv[id])/dt;
     
     return ito;
     #else
-    #ifdef ENDO
-    double Gto=0.073;
-    #else
-    double Gto = 0.294;
-    #endif
     
     double R_INF, S_INF, TAU_R, TAU_S, ek, ito;
     
     ek = (rtf/zk)*log(ko/ki[id]);
     
     #ifdef EPI
-    R_INF=1./(1.+exp((20-(v[id] - rinfshift[id]))/6.));
-    S_INF=1./(1.+exp(((v[id] - sinfshift[id])+20)/5.));
-    TAU_R=9.5*exp(-((v[id] - taurshift[id])+40.)*((v[id] - taurshift[id])+40.)/1800.)+0.8;
-    TAU_S=85.*exp(-((v[id] - tausshift[id])+45.)*((v[id] - tausshift[id])+45.)/320.)+5./(1.+exp(((v[id] - tausshift[id])-20.)/5.))+3.;
+    R_INF=1.0/(1.0+exp((20.0-(v[id] - rinfshift[id]))/6.0));
+    S_INF=1.0/(1.0+exp(((v[id] - sinfshift[id])+20)/5.0));
+    TAU_R=9.5*exp(-((v[id] - taurshift[id])+40.0)*((v[id] - taurshift[id])+40.0)/1800.)+0.8;
+    TAU_S=85.*exp(-((v[id] - tausshift[id])+45.0)*((v[id] - tausshift[id])+45.0)/320.)+5.0/(1.0+exp(((v[id] - tausshift[id])-20.0)/5.0))+3.0;
     #endif
     #ifdef ENDO
-    R_INF=1./(1.+exp((20-(v[id] - rinfshift[id]))/6.));
-    S_INF=1./(1.+exp(((v[id] - sinfshift[id])+28)/5.));
-    TAU_R=9.5*exp(-((v[id] - taurshift[id])+40.)*((v[id] - taurshift[id])+40.)/1800.)+0.8;
-    TAU_S=1000.*exp(-((v[id] - tausshift[id])+67)*((v[id] - tausshift[id])+67)/1000.)+8.;
+    R_INF=1.0/(1.0+exp((20.0-(v[id] - rinfshift[id]))/6.0));
+    S_INF=1.0/(1.0+exp(((v[id] - sinfshift[id])+28.0)/5.0));
+    TAU_R=9.5*exp(-((v[id] - taurshift[id])+40.0)*((v[id] - taurshift[id])+40.0)/1800.0)+0.8;
+    TAU_S=1000.0*exp(-((v[id] - tausshift[id])+67.0)*((v[id] - tausshift[id])+67.0)/1000.0)+8.0;
     #endif
     #ifdef MCELL
-    R_INF=1./(1.+exp((20-(v[id] - rinfshift[id]))/6.));
-    S_INF=1./(1.+exp(((v[id] - sinfshift[id])+20)/5.));
-    TAU_R=9.5*exp(-((v[id] - taurshift[id])+40.)*((v[id] - taurshift[id])+40.)/1800.)+0.8;
-    TAU_S=85.*exp(-((v[id] - tausshift[id])+45.)*((v[id] - tausshift[id])+45.)/320.)+5./(1.+exp(((v[id] - tausshift[id])-20.)/5.))+3.;
+    R_INF=1.0/(1.0+exp((20.0-(v[id] - rinfshift[id]))/6.0));
+    S_INF=1.0/(1.0+exp(((v[id] - sinfshift[id])+20.0)/5.0));
+    TAU_R=9.5*exp(-((v[id] - taurshift[id])+40.0)*((v[id] - taurshift[id])+40.0)/1800.0)+0.8;
+    TAU_S=85.*exp(-((v[id] - tausshift[id])+45.0)*((v[id] - tausshift[id])+45.0)/320.0)+5.0/(1.0+exp(((v[id] - tausshift[id])-20.0)/5.0))+3.0;
     #endif
     
     ito = itofac[id]*Gto*zdv[id]*ydv[id]*(v[id]-ek);
@@ -362,7 +429,7 @@ double TTCellIto<ncells>::comp_ito (int id, double dt, double& dzdv, double& dyd
 }
 
 template <int ncells>
-double TTCellIto<ncells>::comp_isk (int id)
+double TP06Cell<ncells>::comp_isk (int id)
 {
     double isk, ek, z;
     z = 1.0/(1.0 + pow(skh[id]/cai[id],skn[id]));
@@ -374,13 +441,15 @@ double TTCellIto<ncells>::comp_isk (int id)
 }
 
 template <int ncells>
-double TTCellIto<ncells>::comp_iks (int id, double dt, double& dxs)
+double TP06Cell<ncells>::comp_iks (int id, double dt, double& dxs)
 {
-    double eks, xsss, tauxs, iks;
+    double eks, xsss, axs, bxs, tauxs, iks;
     
     eks = rtf*log((ko + pkna*nao)/(ki[id] + pkna*nai[id]));
     xsss = 1.0/(1.0 + exp((-5.0-v[id])/14.0));
-    tauxs = 1100.0/(sqrt(1.0 + exp((-10.0-v[id])/6.0))*(1.0 + exp((v[id]-60.0)/20.0)));
+    axs = 1400.0/(sqrt(1.0 + exp((5.0 - v[id])/6.0)));
+    bxs = 1.0/(1.0 + exp((v[id] - 35.0)/15.0));
+    tauxs = axs*bxs + 80.0;
     
     iks = iksfac[id]*gks*xs[id]*xs[id]*(v[id]-eks);
     
@@ -390,7 +459,7 @@ double TTCellIto<ncells>::comp_iks (int id, double dt, double& dxs)
 }
 
 template <int ncells>
-double TTCellIto<ncells>::comp_ikr (int id, double dt, double& dxr1, double& dxr2)
+double TP06Cell<ncells>::comp_ikr (int id, double dt, double& dxr1, double& dxr2)
 {
     double ek, axr1, bxr1, axr2, bxr2, tauxr1, tauxr2, xr1ss, xr2ss, ikr;
     
@@ -417,7 +486,7 @@ double TTCellIto<ncells>::comp_ikr (int id, double dt, double& dxr1, double& dxr
 }
 
 template <int ncells>
-double TTCellIto<ncells>::comp_ik1 (int id)
+double TP06Cell<ncells>::comp_ik1 (int id)
 {
     double ek, ak1, bk1, xk1ss, ik1;
     ek = (rtf/zk)*log(ko/ki[id]);
@@ -429,7 +498,7 @@ double TTCellIto<ncells>::comp_ik1 (int id)
 }
 
 template <int ncells>
-double TTCellIto<ncells>::comp_inaca (int id)
+double TP06Cell<ncells>::comp_inaca (int id)
 {
     double inaca;
     inaca = nacafac[id]*knaca*(exp(gamma*v[id]*frt)*nai[id]*nai[id]*nai[id]*cao - exp((gamma-1.0)*v[id]*frt)*nao*nao*nao*cai[id]*alpha)/((kmnai*kmnai*kmnai + nao*nao*nao)*(kmca + cao)*(1.0 + ksat*exp((gamma-1.0)*v[id]*frt)));
@@ -438,7 +507,7 @@ double TTCellIto<ncells>::comp_inaca (int id)
 }
 
 template <int ncells>
-double TTCellIto<ncells>::comp_inak (int id)
+double TP06Cell<ncells>::comp_inak (int id)
 {
     double inak;
     inak = nakfac[id]*knak*ko*nai[id]/((ko+kmk)*(nai[id]+kmna)*(1.0 + 0.1245*exp(-0.1*v[id]*frt) + 0.0353*exp(-v[id]*frt)));
@@ -447,7 +516,7 @@ double TTCellIto<ncells>::comp_inak (int id)
 }
 
 template <int ncells>
-double TTCellIto<ncells>::comp_ipca (int id)
+double TP06Cell<ncells>::comp_ipca (int id)
 {
     double ipca;
     ipca = gpca*cai[id]/(kpca + cai[id]);
@@ -455,7 +524,7 @@ double TTCellIto<ncells>::comp_ipca (int id)
 }
 
 template <int ncells>
-double TTCellIto<ncells>::comp_ipk (int id)
+double TP06Cell<ncells>::comp_ipk (int id)
 {
     double ipk, ek;
     ek = (rtf/zk)*log(ko/ki[id]);
@@ -464,7 +533,7 @@ double TTCellIto<ncells>::comp_ipk (int id)
 }
 
 template <int ncells>
-double TTCellIto<ncells>::comp_ibna (int id)
+double TP06Cell<ncells>::comp_ibna (int id)
 {
     double ena, ibna;
     ena = (rtf/zna)*log(nao/nai[id]);
@@ -473,7 +542,7 @@ double TTCellIto<ncells>::comp_ibna (int id)
 }
 
 template <int ncells>
-double TTCellIto<ncells>::comp_ibca (int id)
+double TP06Cell<ncells>::comp_ibca (int id)
 {
     double eca, ibca;
     eca = (rtf/zca)*log(cao/cai[id]);
@@ -482,8 +551,56 @@ double TTCellIto<ncells>::comp_ibca (int id)
 }
 
 template <int ncells>
-void TTCellIto<ncells>::comp_calcdyn (int id, double dt, double ical, double ibca, double ipca, double inaca, double &dg, double &dcasr, double &dcai) // MAKE SURE THIS IS COMPUTED AFTER ALL OTHER CURRENTS
+void TP06Cell<ncells>::comp_calcdyn (int id, double dt, double ical, double ibca, double ipca, double inaca, double &drbar, double &dcasr, double &dcai, double& dcass) // MAKE SURE THIS IS COMPUTED AFTER ALL OTHER CURRENTS
 {
+    double ileak, iup, kcasr, k1, k2, op, irel, ixfer;
+    double casrbuf, cabuf, cassbuf, bjsr, cjsr, bc, cc, bcss, ccss;
+    
+    ileak = vleak*(casr[id] - cai[id]);
+    iup = vmaxup/(1.0 + (kup/cai[id])*(kup/cai[id]));
+
+    kcasr = maxsr - (maxsr - minsr)/(1.0 + (EC/casr[id])*(EC/casr[id]));
+    k1 = k1p/kcasr;
+    k2 = k2p*kcasr;
+    op = k1*cass[id]*cass[id]*rbar[id]/(k3 + k1*cass[id]*cass[id]);
+    irel = vrel*op*(casr[id] - cass[id]);
+    ixfer = vxfer*(cass[id] - cai[id]);
+    //drbar = -k2*cass[id]*rbar[id] + k4*(1.0 - rbar[id]);
+    drbar = ((k4 + exp(-dt*(k4 + cass[id]*k2))*(k4*rbar[id] - k4 + cass[id]*k2*rbar[id]))/(k4 + cass[id]*k2) - rbar[id])/dt;
+    
+    casrbuf = bufsr*casr[id]/(casr[id]+kbufsr);
+    cabuf = bufc*cai[id]/(cai[id]+kbufc);
+    cassbuf = bufss*cass[id]/(cass[id]+kbufss);
+    
+    dcasr = dt*(iup - ileak - irel);
+    bjsr = bufsr - casrbuf - casr[id] - dcasr + kbufsr;
+    cjsr = kbufsr*(casrbuf+dcasr+casr[id]);
+    if (cjsr < 0.0) {
+        bjsr = bufsr - casrbuf - casr[id]*exp(dcasr/casr[id]) + kbufsr;
+        cjsr = kbufsr*(casrbuf + casr[id]*exp(dcasr/casr[id]));
+    }
+    dcasr = ((sqrt(bjsr*bjsr + 4.0*cjsr)-bjsr)/2.0 - casr[id])/dt;
+    
+    dcai = dt*(-(ibca + ipca - 2*inaca)/(2.0*vc*frdy)*capacitance + (vsr/vc)*(ileak - iup) + ixfer);
+    bc = bufc - cabuf - cai[id] - dcai + kbufc;
+    cc = kbufc*(cabuf+dcai+cai[id]);
+    if (cc < 0.0) {
+        bc = bufc - cabuf - cai[id]*exp(dcai/cai[id]) + kbufc;
+        cc = kbufc*(cabuf + cai[id]*exp(dcai/cai[id]));
+    }
+    dcai = ((sqrt(bc*bc+4.0*cc)-bc)/2.0 - cai[id])/dt;
+    
+    dcass = dt*(-ical/(2.0*vss*frdy)*capacitance + (vsr/vss)*irel - (vc/vss)*ixfer);
+    bcss = bufss - cassbuf - cass[id] - dcass + kbufss;
+    ccss = kbufss*(cassbuf + dcass + cass[id]);
+    if (ccss < 0.0) {
+        bcss = bufss - cassbuf - cass[id]*exp(dcass/cass[id]) + kbufss;
+        ccss = kbufss*(cassbuf + cass[id]*exp(dcass/cass[id]));
+    }
+    dcass = ((sqrt(bcss*bcss+4.0*ccss)-bcss)/2.0 - cass[id])/dt;
+
+    
+    /*
     double gss, icac, irel, ileak, iup, icasr, casrbuf, bjsr, cjsr, cabuf, bc, cc;
     
     gss = (cai[id] > 0.00035) ? 1.0/(1.0 + pow(cai[id]/0.00035,16.0)) : 1.0/(1.0 + pow(cai[id]/0.00035,6.0));
@@ -512,16 +629,18 @@ void TTCellIto<ncells>::comp_calcdyn (int id, double dt, double ical, double ibc
         cc = kbufc*(cabuf + cai[id]*exp(dcai/cai[id]));
     }
     dcai = ((sqrt(bc*bc+4.0*cc)-bc)/2.0 - cai[id])/dt;
+    */
 }
 
 template <int ncells>
-void TTCellIto<ncells>::setcell (int id, TTCellIto<1>* newcell)
+void TP06Cell<ncells>::setcell (int id, TP06Cell<1>* newcell)
 {
     v[id] = newcell->v[0];
     nai[id] = newcell->nai[0];
     ki[id] = newcell->ki[0];
     cai[id] = newcell->cai[0];
     casr[id] = newcell->casr[0];
+    cass[id] = newcell->cass[0];
     m[id] = newcell->m[0];
     h[id] = newcell->h[0];
     j[id] = newcell->j[0];
@@ -530,40 +649,43 @@ void TTCellIto<ncells>::setcell (int id, TTCellIto<1>* newcell)
     xs[id] = newcell->xs[0];
     d[id] = newcell->d[0];
     f[id] = newcell->f[0];
+    f2[id] = newcell->f2[0];
     fca[id] = newcell->fca[0];
-    g[id] = newcell->g[0];
+    rbar[id] = newcell->rbar[0];
     zdv[id] = newcell->zdv[0];
     ydv[id] = newcell->ydv[0];
     diffcurrent[id] = newcell->diffcurrent[0];
     itofac[id] = newcell->itofac[0];
-    ibarcafac[id] = newcell->ibarcafac[0]; //
     nacafac[id] = newcell->nacafac[0];
     nakfac[id] = newcell->nakfac[0];
     ikrfac[id] = newcell->ikrfac[0];
     iksfac[id] = newcell->iksfac[0];
+    ibarcafac[id] = newcell->ibarcafac[0];
     
     iskfac[id] = newcell->iskfac[0];
     skh[id] = newcell->skh[0];
     skn[id] = newcell->skn[0];
+    
+    naiclamped[id] = newcell->naiclamped[0];
+    kiclamped[id] = newcell->kiclamped[0];
+    
     #ifndef UCLAito
     rinfshift[id] = newcell->rinfshift[0];
     sinfshift[id] = newcell->sinfshift[0];
     taurshift[id] = newcell->taurshift[0];
     tausshift[id] = newcell->tausshift[0];
     #endif
-    
-    naiclamped[id] = newcell->naiclamped[0];
-    kiclamped[id] = newcell->kiclamped[0];
 }
 
 template <int ncells>
-void TTCellIto<ncells>::getcell (int id, TTCellIto<1>* newcell)
+void TP06Cell<ncells>::getcell (int id, TP06Cell<1>* newcell)
 {
     newcell->v[0] = v[id];
     newcell->nai[0] = nai[id];
     newcell->ki[0] = ki[id];
     newcell->cai[0] = cai[id];
     newcell->casr[0] = casr[id];
+    newcell->cass[0] = cass[id];
     newcell->m[0] = m[id];
     newcell->h[0] = h[id];
     newcell->j[0] = j[id];
@@ -572,21 +694,25 @@ void TTCellIto<ncells>::getcell (int id, TTCellIto<1>* newcell)
     newcell->xs[0] = xs[id];
     newcell->d[0] = d[id];
     newcell->f[0] = f[id];
+    newcell->f2[0] = f2[id];
     newcell->fca[0] = fca[id];
-    newcell->g[0] = g[id];
+    newcell->rbar[0] = rbar[id];
     newcell->zdv[0] = zdv[id];
     newcell->ydv[0] = ydv[id];
     newcell->diffcurrent[0] = diffcurrent[id];
     newcell->itofac[0] = itofac[id];
+    newcell->ibarcafac[0] = ibarcafac[id];
     newcell->nacafac[0] = nacafac[id];
     newcell->nakfac[0] = nakfac[id];
     newcell->ikrfac[0] = ikrfac[id];
     newcell->iksfac[0] = iksfac[id];
-    newcell->ibarcafac[0] = ibarcafac[id];
     
     newcell->iskfac[0] = iskfac[id];
     newcell->skh[0] = skh[id];
     newcell->skn[0] = skn[id];
+    
+    newcell->naiclamped[0] = naiclamped[id];
+    newcell->kiclamped[0] = kiclamped[id];
     
     #ifndef UCLAito
     newcell->rinfshift[0] = rinfshift[id];
@@ -594,13 +720,10 @@ void TTCellIto<ncells>::getcell (int id, TTCellIto<1>* newcell)
     newcell->taurshift[0] = taurshift[id];
     newcell->tausshift[0] = tausshift[id];
     #endif
-    
-    newcell->naiclamped[0] = naiclamped[id];
-    newcell->kiclamped[0] = kiclamped[id];
 }
 
 template <int ncells>
-void TTCellIto<ncells>::saveconditions(FILE* file, int id, bool header, double t) {
+void TP06Cell<ncells>::saveconditions(FILE* file, int id, bool header, double t) {
     if (header) {
         fprintf(file,"t\tv\tm\th\tj\td\tf\tfca\tzdv\tydv\txs\txr1\txr2\tg\tcai\tcasr\tnai\tki\n");
     }
@@ -611,13 +734,14 @@ void TTCellIto<ncells>::saveconditions(FILE* file, int id, bool header, double t
     fprintf(file,"%.12f\t",j[id]);
     fprintf(file,"%.12f\t",d[id]);
     fprintf(file,"%.12f\t",f[id]);
+    fprintf(file,"%.12f\t",f2[id]);
     fprintf(file,"%.12f\t",fca[id]);
     fprintf(file,"%.12f\t",zdv[id]);
     fprintf(file,"%.12f\t",ydv[id]);
     fprintf(file,"%.12f\t",xs[id]);
     fprintf(file,"%.12f\t",xr1[id]);
     fprintf(file,"%.12f\t",xr2[id]);
-    fprintf(file,"%.12f\t",g[id]);
+    fprintf(file,"%.12f\t",rbar[id]);
     fprintf(file,"%.12f\t",cai[id]);
     fprintf(file,"%.12f\t",casr[id]);
     fprintf(file,"%.12f\t",nai[id]);
@@ -625,12 +749,12 @@ void TTCellIto<ncells>::saveconditions(FILE* file, int id, bool header, double t
 }
 
 template <int ncells>
-void TTCellIto<ncells>::write(std::fstream& file) {
+void TP06Cell<ncells>::write(std::fstream& file) {
     file.write((char*)&this, sizeof(this) );
 }
 
 template <int ncells>
-void TTCellIto<ncells>::read(std::fstream& file) {
+void TP06Cell<ncells>::read(std::fstream& file) {
     file.read((char*)&this, sizeof(this) );
 }
 /*
@@ -687,5 +811,5 @@ void TTCellIto<ncells>::read(std::fstream& file) {
 #undef gsk
 */
 
-#endif // TTCellIto_cpp
+#endif // TP06Cell_cpp
 

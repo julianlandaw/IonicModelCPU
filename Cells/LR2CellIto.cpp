@@ -242,12 +242,16 @@ LR2CellIto<ncells>::LR2CellIto()
         iskfac[i] = 0.0;
         skh[i] = 0.0006;
         skn[i] = 4;
+        xsk[i] = 0.0;
         tauXfac[i] = 1.0;
         iupfac[i] = 1.0;
         ikrfac[i] = 1.0;
         iksfac[i] = 1.0;
 
-		nacafac[i] = 1.0;
+        nacafac[i] = 1.0;
+        ikatpfac[i] = 1.0;
+        
+        tauyfac[i] = 1.0;
     }
     
 }
@@ -268,7 +272,7 @@ bool LR2CellIto<ncells>::iterate(const int id, double dt, double st, double dv_m
     double dnai, dki, dcai; //ion concentration changes
     double dcaiont, dtcicr, djsr, dnsr; //calcium dynamics changes
     //double dnao, dko, dcao; //cleft concentration changes
-    double isk;
+    double dxsk, isk;
     
     comp_ina(id, dt, dm, dh, dj, ina);
     comp_ical(id, dt, dd, df, ilca, ilcana, ilcak);
@@ -280,7 +284,7 @@ bool LR2CellIto<ncells>::iterate(const int id, double dt, double st, double dv_m
     //comp_ikna(id, ikna); 
     //comp_ikatp(id, ikatp);
     comp_ito(id, dt, dzdv, dydv, ito);
-    comp_isk(id, isk);
+    comp_isk(id, dt, dxsk, isk);
     comp_inaca(id, inaca);
     comp_inak(id, inak);
     //comp_insca(id, insna, insk); 
@@ -332,11 +336,16 @@ bool LR2CellIto<ncells>::iterate(const int id, double dt, double st, double dv_m
     xs2[id] += dxs2*dt;
     zdv[id] += dzdv*dt;
     ydv[id] += dydv*dt;
+#ifndef clampnai
     nai[id] += dnai*dt;
+#endif
+#ifndef clampki
     ki[id] += dki*dt;
+#endif
     cai[id] += dcai*dt;
     jsr[id] += djsr*dt;
     nsr[id] += dnsr*dt;
+    xsk[id] += dxsk*dt;
     //nao[id] += dnao*dt;
     //ko[id] += dko*dt;
     //cao[id] += dcao*dt;
@@ -362,7 +371,7 @@ void LR2CellIto<ncells>::comp_ina (int id, double dt, double& dm, double& dh, do
     double ena, am, bm, ah, bh, aj, bj, mtau, htau, jtau, mss, hss, jss; 
     ena = ((R*temp)/frdy)*log(nao[id]/nai[id]); 
 
-    if (fabs(v[id] + 47.13) < 1e-2) {
+    if (abs(v[id] + 47.13) < 1e-2) {
         am = 0.32/0.1;    
     }
     else {
@@ -404,7 +413,7 @@ void LR2CellIto<ncells>::comp_ical (int id, double dt, double& dd, double& df, d
     double dss, taud, fss, tauf, fca, ibarca, ibarna, ibark, vfrt;
 #ifndef Miyoshi
     dss = 1.0/(1.0+exp(-(v[id]+10.0)/6.24)); 
-    if (fabs(v[id] + 10.0) < 1e-2) {
+    if (abs(v[id] + 10.0) < 1e-2) {
         taud = dss*1.0/(6.24*0.035);    
     }
     else {
@@ -427,7 +436,7 @@ void LR2CellIto<ncells>::comp_ical (int id, double dt, double& dd, double& df, d
     
     vfrt = v[id]*frdy/(R*temp);
     
-    if (fabs(vfrt) < 1e-3) {
+    if (abs(vfrt) < 1e-3) {
         ibarca = pca*zca*frdy*(gacai*cai[id]*exp(zca*vfrt) - gacao*cao[id])/(1.0 + (zca*vfrt)/2.0 + (zca*vfrt)*(zca*vfrt)/6.0 + (zca*vfrt)*(zca*vfrt)*(zca*vfrt)/24.0);
         ibarna = pna*zna*frdy*(ganai*nai[id]*exp(zna*vfrt) - ganao*nao[id])/(1.0 + (zna*vfrt)/2.0 + (zna*vfrt)*(zna*vfrt)/6.0 + (zna*vfrt)*(zna*vfrt)*(zna*vfrt)/24.0);
         ibark = pk*zk*frdy*(gaki*ki[id]*exp(zk*vfrt) - gako*ko[id])/(1.0 + (zk*vfrt)/2.0 + (zk*vfrt)*(zk*vfrt)/6.0 + (zk*vfrt)*(zk*vfrt)*(zk*vfrt)/24.0);
@@ -487,13 +496,13 @@ void LR2CellIto<ncells>::comp_ikr (int id, double dt, double& dxr, double& ikr)
 
     xrss = 1.0/(1.0+exp(-(v[id]+21.5)/7.5)); 
     tauxr = 0.0;
-    if (fabs(v[id] + 14.2) < 1e-2) {
+    if (abs(v[id] + 14.2) < 1e-2) {
         tauxr = tauxr + 1.0/(0.00138/0.123);    
     }
     else {
         tauxr = tauxr + 1.0/(0.00138*(v[id]+14.2)/(1.0-exp(-0.123*(v[id]+14.2))));
     }
-    if (fabs(v[id] + 38.9) < 1e-2) {
+    if (abs(v[id] + 38.9) < 1e-2) {
         tauxr = tauxr + 0.00061/0.145;    
     }
     else {
@@ -519,7 +528,7 @@ void LR2CellIto<ncells>::comp_iks (int id, double dt, double& dxs1, double& dxs2
 
     xs1ss = 1.0/(1.0+exp(-(v[id]-1.5)/16.7)); 
     xs2ss = xs1ss; 
-    if (fabs(v[id] + 30.0) < 1e-2) {
+    if (abs(v[id] + 30.0) < 1e-2) {
         tauxs1 = 1.0/(0.0000719/0.148 + 0.000131/0.0687);    
     }
     else {
@@ -580,7 +589,7 @@ void LR2CellIto<ncells>::comp_ikatp (int id, double& ikatp)
     patp = 1.0/(1.0+(pow((atpi/katp),hatp))); 
     gkbaratp = gkatp*patp*(pow((ko[id]/4.0),natp)); 
 
-    ikatp = gkbaratp*(v[id]-ekatp); 
+    ikatp = ikatpfac[id]*gkbaratp*(v[id]-ekatp); 
 } 
 
 #ifdef UCLAito
@@ -635,11 +644,15 @@ void LR2CellIto<ncells>::comp_ito (int id, double dt, double& dzdv, double& dydv
     tauzdv = 1.0/(azdv+bzdv); 
     zssdv = azdv/(azdv+bzdv); 
     dzdv = (zssdv-(zssdv-zdv[id])*exp(-dt/tauzdv) - zdv[id])/dt; 
-
+#ifdef UCLAtauyf
+    tauydv = 20.0/(1.0 + exp((v[id] + 33.5)/10.0)) + 20.0;;
+    yssdv = 1.0/(1.0 + exp((v[id] + 33.5)/10.0));
+#else
     aydv = 0.015/(1.0+exp((v[id]+60.0)/5.0)); 
     bydv = (0.1*exp((v[id]+25.0)/5.0))/(1.0+exp((v[id]+25.0)/5.0)); 
-    tauydv = 1.0/(aydv+bydv); 
+    tauydv = tauyfac[id]/(aydv + bydv); //1.0/(aydv+bydv); 
     yssdv = aydv/(aydv+bydv); 
+#endif
     dydv = (yssdv-(yssdv-ydv[id])*exp(-dt/tauydv) - ydv[id])/dt; 
     ito = itofac[id]*gitodv*zdv[id]*zdv[id]*zdv[id]*ydv[id]*rvdv*(v[id]-ekdv); 
 }
@@ -647,14 +660,24 @@ void LR2CellIto<ncells>::comp_ito (int id, double dt, double& dzdv, double& dydv
 #endif
 
 template <int ncells>
-void LR2CellIto<ncells>::comp_isk (int id, double& isk)
+void LR2CellIto<ncells>::comp_isk (int id, double dt, double& dxsk, double& isk)
 {
-    double ek, z;
+    double ek, xskss, tausk;
+    //double ek, z;
     double rat = pow(skh[id]/cai[id],skn[id]);
-    z = 1.0/(1.0 + rat);
+    //z = 1.0/(1.0 + rat);
+    xskss = 1.0/(1.0 + rat);
+#ifndef TAUSK
+    tausk = 0.00001;
+#else
+    tausk = 5.0 + 25.0/(1.0 + (cai[id]/0.0001));
+#endif
+    //tausk = 200.0/(1.0 + (cai[id]/0.000175)); //200
     ek = ((R*temp)/frdy)*log((ko[id])/(ki[id]));
+    dxsk = (xskss - (xskss - xsk[id])*exp(-dt/tausk) - xsk[id])/dt;
     
-    isk = iskfac[id]*gsk*z*(v[id] - ek);
+    //isk = iskfac[id]*gsk*z*(v[id] - ek);
+    isk = iskfac[id]*gsk*xsk[id]*(v[id] - ek);
 }
 
 template <int ncells>
@@ -835,11 +858,14 @@ void LR2CellIto<ncells>::setcell (int id, LR2CellIto<1>* newcell)
     itofac[id] = newcell->itofac[0];
     iskfac[id] = newcell->iskfac[0];
     skh[id] = newcell->skh[0];
+    skn[id] = newcell->skn[0]; //
     tauXfac[id] = newcell->tauXfac[0];
     iupfac[id] = newcell->iupfac[0];
     ikrfac[id] = newcell->ikrfac[0];
     iksfac[id] = newcell->iksfac[0];
     nacafac[id] = newcell->nacafac[0];
+    ikatpfac[id] = newcell->ikatpfac[0];
+    tauyfac[id] = newcell->tauyfac[0];
 }
 
 template <int ncells>
@@ -876,11 +902,14 @@ void LR2CellIto<ncells>::getcell (int id, LR2CellIto<1>* newcell)
     newcell->itofac[0] = itofac[id];
     newcell->iskfac[0] = iskfac[id];
     newcell->skh[0] = skh[id];
+    newcell->skn[0] = skn[id];
     newcell->tauXfac[0] = tauXfac[id];
     newcell->iupfac[0] = iupfac[id];
     newcell->ikrfac[0] = ikrfac[id];
     newcell->iksfac[0] = iksfac[id];
     newcell->nacafac[0] = nacafac[id];
+    newcell->ikatpfac[0] = ikatpfac[id];
+    newcell->tauyfac[0] = tauyfac[id];
 }
 
 template <int ncells>

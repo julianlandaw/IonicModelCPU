@@ -1,17 +1,17 @@
 //
-//  TTCellIto.h
+//  TP06Cell.h
 //
 //  Implementation of the ten Tusscher model, with UCLA Ito
 //  Created by Julian Landaw on 12/25/16.
 //  Copyright © 2016 Julian Landaw. All rights reserved.
 //
-#ifndef TTCellIto_h
-#define TTCellIto_h
+#ifndef TP06Cell_h
+#define TP06Cell_h
 
 #include <fstream>
 
 template <int ncells>
-class TTCellIto
+class TP06Cell
 {
 public:
     double v[ncells]; //Membrane voltage
@@ -21,6 +21,7 @@ public:
     double ki[ncells];
     double cai[ncells];
     double casr[ncells];
+    double cass[ncells];
     
     /* Fast Sodium Current (time dependant) */
     double m[ncells]; // Na activation
@@ -30,6 +31,7 @@ public:
     /* L-type Calcium Window Current ([Ca] dependent) */
     double d[ncells];
     double f[ncells];
+    double f2[ncells];
     double fca[ncells];
     
     /* Ito Transient Outward Current (Dumaine et al. Circ Res 1999;85:803-809) */
@@ -47,7 +49,7 @@ public:
     double xr1[ncells];
     double xr2[ncells];
     
-    double g[ncells]; //19 arrays
+    double rbar[ncells]; //19 arrays
     
     // SK Variables
     double iskfac[ncells];
@@ -65,7 +67,7 @@ public:
     bool naiclamped[ncells];
     bool kiclamped[ncells];
     
-    TTCellIto();
+    TP06Cell();
     
     bool iterate(const int id, double dt, double st, double dv_max);
     
@@ -73,7 +75,7 @@ public:
     
     double comp_ina (int id, double dt, double& dm, double& dh, double& dj); //Fast Sodium Current
     
-    double comp_ical (int id, double dt, double& dd, double& df, double& dfca); // L-type Calcium Current
+    double comp_ical (int id, double dt, double& dd, double& df, double& df2, double& dfca); // L-type Calcium Current
     
     double comp_ito (int id, double dt, double& dzdv, double& dydv);
     
@@ -97,11 +99,11 @@ public:
     
     double comp_ibca (int id);
     
-    void comp_calcdyn (int id, double dt, double ical, double ibca, double ipca, double inaca, double& dg, double& dcasr, double& dcai); // MAKE SURE THIS IS COMPUTED AFTER ALL OTHER CURRENTS
+    void comp_calcdyn (int id, double dt, double ical, double ibca, double ipca, double inaca, double& drbar, double& dcasr, double& dcai, double& dcass); // MAKE SURE THIS IS COMPUTED AFTER ALL OTHER CURRENTS
     
-    void setcell (int id, TTCellIto<1>* newcell);
+    void setcell (int id, TP06Cell<1>* newcell);
     
-    void getcell (int id, TTCellIto<1>* newcell);
+    void getcell (int id, TP06Cell<1>* newcell);
     
     void saveconditions(FILE* file, int id, bool header, double t=0.0);
     
@@ -111,5 +113,5 @@ public:
     
 };
 
-#endif // TTCellIto_h
+#endif // TP06Cell_h
 

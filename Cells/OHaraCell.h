@@ -147,10 +147,22 @@ public:
     double inafac[ncells];
     double ikrfac[ncells];
     double iksfac[ncells];
+    double icalfac[ncells];
+    double nacafac[ncells];
+    double yshift[ncells];
+    
+    double vssfac[ncells]; // Scaling factor for the submembrane space, control=1
+    double tauffac[ncells];
+    double taufshift[ncells];
     
     double iskfac[ncells];
     double skh[ncells];
     double skn[ncells];
+    double alphask[ncells];
+    double xsk[ncells];
+    
+    bool naiclamp[ncells];
+    bool kiclamp[ncells];
     
     OHaraCell();
     
@@ -176,7 +188,7 @@ public:
     double comp_dcp(const int id, double po, double Qr, double rxa);
     
     // SK
-    double comp_isk(const int id);
+    double comp_isk(const int id, double dt, double& dxsk);
     
     void setcell (int id, OHaraCell<1>* newcell);
     

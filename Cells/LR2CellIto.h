@@ -50,10 +50,14 @@ public:
     double ikrfac[ncells];
     double iksfac[ncells];
     double nacafac[ncells];
+    double ikatpfac[ncells];
 
     double iskfac[ncells];
     double skh[ncells];
     double skn[ncells];
+    double xsk[ncells];
+    
+    double tauyfac[ncells];
     
     double diffcurrent[ncells];
     
@@ -73,7 +77,7 @@ public:
     void comp_ikna (int id, double& ikna);
     void comp_ikatp (int id, double& ikatp);
     void comp_ito (int id, double dt, double& dzdv, double& dydv, double& ito);
-    void comp_isk(int id, double& isk);
+    void comp_isk(int id, double dt, double& dxsk, double& isk);
     void comp_inaca (int id, double& inaca);
     void comp_inak (int id, double& inak);
     void comp_insca (int id, double& insna, double& insk);

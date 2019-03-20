@@ -749,16 +749,19 @@ void UCLACell<ncells>::setcell (int id, UCLACell<1>* newcell)
     jparam[id] = newcell->jparam[0];
     diffcurrent[id] = newcell->diffcurrent[0];
     
+    inafac[id] = newcell->inafac[0]; //
+    itoslowfac[id] = newcell->itoslowfac[0]; //
     itofac[id] = newcell->itofac[0];
     ikrfac[id] = newcell->ikrfac[0];
     iksfac[id] = newcell->iksfac[0];
     nacafac[id] = newcell->nacafac[0];
+    icalfac[id] = newcell->icalfac[0]; //
 
     iskfac[id] = newcell->iskfac[0];
     skh[id] = newcell->skh[0];
     skn[id] = newcell->skn[0];
     
-    naiclamped[id] = newcell->naiclamped[0];
+    naiclamped[id] = newcell->naiclamped[0]; //need 42
 }
 
 template <int ncells>
@@ -799,11 +802,13 @@ void UCLACell<ncells>::getcell (int id, UCLACell<1>* newcell)
     newcell->jparam[0] = jparam[id];
     newcell->diffcurrent[0] = diffcurrent[id];
     
+    newcell->inafac[0] = inafac[id];
     newcell->itofac[0] = itofac[id];
+    newcell->itoslowfac[0] = itoslowfac[id];
     newcell->ikrfac[0] = ikrfac[id];
     newcell->iksfac[0] = iksfac[id];
     newcell->nacafac[0] = nacafac[id];
-
+    newcell->icalfac[0] = icalfac[id];
 
     newcell->iskfac[0] = iskfac[id];
     newcell->skh[0] = skh[id];

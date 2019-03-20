@@ -82,19 +82,38 @@ OHaraCell<ncells>::OHaraCell()
         inafac[i] = 1.0;
         ikrfac[i] = 1.0;
         iksfac[i] = 1.0;
+        icalfac[i] = 1.0;
+        nacafac[i] = 1.0;
+        yshift[i] = 0.0;
         
+        vssfac[i] = 1.0;
+        tauffac[i] = 1.0;
+        taufshift[i] = 0.0;
         // SK variables, default is there is no SK current
         
         iskfac[i] = 0.0;
         skh[i] = 0.0006;
         skn[i] = 4;
+        alphask[i] = 1.0;
+        xsk[i] = 0.0;
+        
+        #ifdef clampnai
+        naiclamp[i] = true;
+        #else
+        naiclamp[i] = false;
+        #endif
+        #ifdef clampki
+        kiclamp[i] = true;
+        #else
+        kiclamp[i] = false;
+        #endif
     }
 }
 
 template <int ncells>
 bool OHaraCell<ncells>::iterate(const int id, double dt, double st, double dv_max) {
     double dv, INa, INaL, dm, dhf, dhs, dj, dhsp, djp, dmL, dhL, dhLp;
-    double Isk, Ito, da, diF, diS, dap, diFp, diSp;
+    double Isk, dxsk, Ito, da, diF, diS, dap, diFp, diSp;
     double ICaL, ICaNa, ICaK, dd, dff, dfs, dfcaf, dfcas, djca, dffp, dfcafp, dnca;
     double IKr, dxrf, dxrs;
     double IKs, dxs1, dxs2;
@@ -102,7 +121,7 @@ bool OHaraCell<ncells>::iterate(const int id, double dt, double st, double dv_ma
     double INaCa_i, INaCa_ss, INaK, IKb, INab, ICab, IpCa;
     
     comp_ina(id, dt, INa, INaL, dm, dhf, dhs, dj, dhsp, djp, dmL, dhL, dhLp);
-    Isk = comp_isk(id);
+    Isk = comp_isk(id, dt, dxsk);
     Ito = comp_ito(id, dt, da, diF, diS, dap, diFp, diSp);
     comp_ical(id, dt, ICaL, ICaNa, ICaK, dd, dff, dfs, dfcaf, dfcas, djca, dffp, dfcafp, dnca);
     IKr = comp_ikr(id, dt, dxrf, dxrs);
@@ -177,11 +196,15 @@ bool OHaraCell<ncells>::iterate(const int id, double dt, double st, double dv_ma
 
     Jtr = (cansr[id] - cajsr[id])/100.0;
 
-    nai[id] += dt*(-(INa+INaL+3.0*INaCa_i+3.0*INaK+INab)*Acap/(F*vmyo) + JdiffNa*vss/vmyo);
-    nass[id] += dt*(-(ICaNa+3.0*INaCa_ss)*Acap/(F*vss) - JdiffNa);
+    if (naiclamp[id] == false) {
+        nai[id] += dt*(-(INa+INaL+3.0*INaCa_i+3.0*INaK+INab)*Acap/(F*vmyo) + JdiffNa*(vssfac[id]*vss)/vmyo);
+        nass[id] += dt*(-(ICaNa+3.0*INaCa_ss)*Acap/(F*(vssfac[id]*vss)) - JdiffNa);
+    }
 
-    ki[id] += dt*(-(Ito+Isk+IKr+IKs+IK1+IKb+st-2.0*INaK)*Acap/(F*vmyo)+JdiffK*vss/vmyo);
-    kss[id] += dt*(-(ICaK)*Acap/(F*vss) - JdiffK);
+    if (kiclamp[id] == false) {
+        ki[id] += dt*(-(Ito+Isk+IKr+IKs+IK1+IKb+st-2.0*INaK)*Acap/(F*vmyo)+JdiffK*(vssfac[id]*vss)/vmyo);
+        kss[id] += dt*(-(ICaK)*Acap/(F*(vssfac[id]*vss)) - JdiffK);
+    }
 
     if (celltype[id] == 1)
     {
@@ -191,10 +214,10 @@ bool OHaraCell<ncells>::iterate(const int id, double dt, double st, double dv_ma
     {
         Bcai = 1.0/(1.0+cmdnmax*kmcmdn/pow(kmcmdn+cai[id],2.0)+trpnmax*kmtrpn/pow(kmtrpn+cai[id],2.0));
     }
-    cai[id] += dt*(Bcai*(-(IpCa+ICab-2.0*INaCa_i)*Acap/(2.0*F*vmyo) - Jup*vnsr/vmyo+Jdiff*vss/vmyo));
+    cai[id] += dt*(Bcai*(-(IpCa+ICab-2.0*INaCa_i)*Acap/(2.0*F*vmyo) - Jup*vnsr/vmyo+Jdiff*(vssfac[id]*vss)/vmyo));
 
     Bcass = 1.0/(1.0+BSRmax*KmBSR/pow(KmBSR+cass[id],2.0) + BSLmax*KmBSL/pow(KmBSL + cass[id],2.0));
-    cass[id] += dt*(Bcass*(-(ICaL-2.0*INaCa_ss)*Acap/(2.0*F*vss)+Jrel*vjsr/vss-Jdiff));
+    cass[id] += dt*(Bcass*(-(ICaL-2.0*INaCa_ss)*Acap/(2.0*F*(vssfac[id]*vss))+Jrel*vjsr/(vssfac[id]*vss)-Jdiff));
 
     cansr[id] += dt*(Jup-Jtr*vjsr/vnsr);
 
@@ -231,7 +254,7 @@ bool OHaraCell<ncells>::iterate(const int id, double dt, double st, double dv_ma
     xs1[id] = dxs1;
     xs2[id] = dxs2;
     xk1[id] = dxk1;
-    
+    xsk[id] = dxsk;
     
     return true;
 }
@@ -269,7 +292,7 @@ void OHaraCell<ncells>::comp_ina (int id, double dt, double& INa, double& INaL, 
     CaMKa = CaMKb + CaMKt[id];
     
     mss = 1.0/(1.0+exp((-((v[id] + mshift)+39.57))/9.871));
-    tm =1.0/(6.765*exp(((v[id] + mshift)+11.64)/34.77)+8.552*exp(-(v[id]+77.42)/5.955));
+    tm =1.0/(6.765*exp(((v[id] + mshift)+11.64)/34.77)+8.552*exp(-((v[id] + mshift)+77.42)/5.955));
     dm = mss - (mss - m[id])*exp(-dt/tm); //dm
     
     hss = 1.0/(1.0+exp(((v[id] + hshift)+82.90)/6.086));
@@ -327,6 +350,7 @@ template <int ncells>
 double OHaraCell<ncells>::comp_ito (int id, double dt, double& da, double& diF, double& diS, double& dap, double& diFp, double& diSp)
 {
     #ifdef noslowito
+    #ifdef UCLAito 
     double ek, rt1, rt2, rt3, xtos_inf, ytos_inf, rs_inf, txs, tys;
     double xtof_inf, ytof_inf, rt4, rt5, txf, tyf, xitof;
     
@@ -334,7 +358,7 @@ double OHaraCell<ncells>::comp_ito (int id, double dt, double& da, double& diF, 
                                           // we use only the variables a and ap (replacing xtof and ytof)
     ek = (1.0/frt)*log(ko/ki[id]);
     rt1 = -(v[id] + 3.0)/15.0;
-    rt2 = (v[id] + 33.5)/10.0;
+    rt2 = (v[id] + 33.5 - yshift[id])/10.0;
     rt3 = (v[id] + 60.0)/10.0;
     xtos_inf = 1.0/(1.0 + exp(rt1));
     ytos_inf = 1.0/(1.0 + exp(rt2));
@@ -348,7 +372,7 @@ double OHaraCell<ncells>::comp_ito (int id, double dt, double& da, double& diF, 
     xtof_inf = xtos_inf;
     ytof_inf = ytos_inf;
     rt4 = -(v[id]/30.0)*(v[id]/30.0);
-    rt5 = (v[id] + 33.5)/10.0;
+    rt5 = (v[id] + 33.5 - yshift[id])/10.0;
     txf = 3.5*exp(rt4) + 1.5;
     tyf = 20.0/(1.0 + exp(rt5)) + 20.0;
     //xitof = itofac[id]*gtof*xtof[id]*ytof[id]*(v[id] - ek);
@@ -357,6 +381,30 @@ double OHaraCell<ncells>::comp_ito (int id, double dt, double& da, double& diF, 
     dap = ytof_inf - (ytof_inf - ap[id])*exp(-dt/tyf);
     
     return xitof;
+    
+    #else
+    // Domaine formulation
+    double ekdv, rvdv, azdv, bzdv, tauzdv, zssdv, aydv, bydv, tauydv, yssdv, xitof;
+    
+    diF = 0; diS = 0; diFp = 0; diSp = 0; // this variables become unnecessary,
+                                          // we use only the variables a and ap (replacing xtof and ytof)
+    ekdv = (1.0/frt)*log(ko/ki[id]); 
+    rvdv = exp(v[id]/100.0); 
+    azdv = (10.0*exp((v[id]-40.0)/25.0))/(1.0+exp((v[id]-40.0)/25.0)); 
+    bzdv = (10.0*exp(-(v[id]+90.0)/25.0))/(1.0+exp(-(v[id]+90.0)/25.0)); 
+    tauzdv = 1.0/(azdv+bzdv); 
+    zssdv = azdv/(azdv+bzdv); 
+    da = zssdv-(zssdv-a[id])*exp(-dt/tauzdv); 
+
+    aydv = 0.015/(1.0+exp((v[id]+60.0)/5.0)); 
+    bydv = (0.1*exp((v[id]+25.0)/5.0))/(1.0+exp((v[id]+25.0)/5.0)); 
+    tauydv = 1.0/(aydv+bydv); 
+    yssdv = aydv/(aydv+bydv); 
+    dap = yssdv-(yssdv-ap[id])*exp(-dt/tauydv); 
+    xitof = itofac[id]*gtof*a[id]*a[id]*a[id]*ap[id]*rvdv*(v[id]-ekdv);
+    return xitof;
+    #endif
+    
     #else
     double EK, CaMKb, CaMKa, ass, ta, iss, delta_epi, tiF, tiS, AiF, AiS, i, assp, dti_develop, dti_recover;
     double tiFp, tiSp, ip, Gto, fItop, Ito;
@@ -435,7 +483,8 @@ void OHaraCell<ncells>::comp_ical(int id, double dt, double& ICaL, double& ICaNa
     dd = dss - (dss - d[id])*exp(-dt/td); //dd
     
     fss = 1.0/(1.0+exp((v[id]+19.58)/3.696));
-    tff = 7.0+1.0/(0.0045*exp(-(v[id]+20.0)/10.0)+0.0045*exp((v[id]+20.0)/10.0));
+    tff = 7.0+1.0/(0.0045*exp(-((v[id] - taufshift[id])+20.0)/10.0)+0.0045*exp(((v[id] - taufshift[id])+20.0)/10.0));
+    tff = tauffac[id]*tff;
     tfs = 1000.0+1.0/(0.000035*exp(-(v[id]+5.0)/4.0)+0.000035*exp((v[id]+5.0)/6.0));
     Aff = 0.6;
     Afs = 1.0-Aff;
@@ -490,6 +539,9 @@ void OHaraCell<ncells>::comp_ical(int id, double dt, double& ICaL, double& ICaNa
     ICaL=(1.0-fICaLp)*PCa*PhiCaL*d[id]*(f*(1.0 - nca[id]) + jca[id]*fca*nca[id]) + fICaLp*PCap*PhiCaL*d[id]*(fp*(1.0 - nca[id]) + jca[id]*fcap*nca[id]);
     ICaNa=(1.0-fICaLp)*PCaNa*PhiCaNa*d[id]*(f*(1.0 - nca[id]) + jca[id]*fca*nca[id]) + fICaLp*PCaNap*PhiCaNa*d[id]*(fp*(1.0 - nca[id]) + jca[id]*fcap*nca[id]);
     ICaK=(1.0-fICaLp)*PCaK*PhiCaK*d[id]*(f*(1.0 - nca[id]) + jca[id]*fca*nca[id]) + fICaLp*PCaKp*PhiCaK*d[id]*(fp*(1.0 - nca[id]) + jca[id]*fcap*nca[id]);
+    ICaL = icalfac[id]*ICaL;
+    ICaNa = icalfac[id]*ICaNa;
+    ICaK = icalfac[id]*ICaK;
 }
 
 template <int ncells>
@@ -642,7 +694,7 @@ void OHaraCell<ncells>::comp_inaca(int id, double& INaCa_i, double& INaCa_ss) {
     {
         Gncx*=1.4;
     }
-    INaCa_i=0.8*Gncx*allo*(zna*JncxNa+zca*JncxCa);
+    INaCa_i=nacafac[id]*0.8*Gncx*allo*(zna*JncxNa+zca*JncxCa);
 
     h1=1+nass[id]/kna3*(1+hna);
     h2=(nass[id]*hna)/(kna3*h1);
@@ -680,7 +732,7 @@ void OHaraCell<ncells>::comp_inaca(int id, double& INaCa_i, double& INaCa_ss) {
     allo=1.0/(1.0+pow(KmCaAct/cass[id],2.0));
     JncxNa=3.0*(E4*k7-E1*k8)+E3*k4pp-E2*k3pp;
     JncxCa=E2*k2-E1*k1;
-    INaCa_ss=0.2*Gncx*allo*(zna*JncxNa+zca*JncxCa);
+    INaCa_ss=nacafac[id]*0.2*Gncx*allo*(zna*JncxNa+zca*JncxCa);
 
     //INaCa=INaCa_i+INaCa_ss;
     
@@ -811,14 +863,24 @@ double OHaraCell<ncells>::comp_ipca(int id)
 #define gsk 0.005
 
 template <int ncells>
-double OHaraCell<ncells>::comp_isk (int id)
+double OHaraCell<ncells>::comp_isk (int id, double dt, double& dxsk)
 {
-    double ek, z, isk;
-    double rat = pow(skh[id]/cass[id],skn[id]);
-    z = 1.0/(1.0 + rat);
+    double ek, z, isk, ccomb, rat, tausk;
     ek = (1.0/frt)*log(ko/ki[id]);
+    ccomb = alphask[id]*cass[id] + (1.0 - alphask[id])*cai[id]; // linear combination of cs and ci
     
-    isk = iskfac[id]*gsk*z*(v[id] - ek);
+    rat = pow(skh[id]/ccomb,skn[id]);
+    
+    z = 1.0/(1.0 + rat); //steady state activation gate
+#ifndef TAUSK
+    tausk = 0.000001;
+#else
+    tausk = 5.0 + 25.0/(1.0 + (ccomb/0.0001));
+#endif
+    
+    dxsk = z - (z - xsk[id])*exp(-dt/tausk);
+    
+    isk = iskfac[id]*gsk*xsk[id]*(v[id] - ek);
     
     return isk;
 }
@@ -876,6 +938,22 @@ void OHaraCell<ncells>::setcell (int id, OHaraCell<1>* newcell)
     inafac[id] = newcell->inafac[0];
     ikrfac[id] = newcell->ikrfac[0];
     iksfac[id] = newcell->iksfac[0];
+    
+    icalfac[id] = newcell->icalfac[0];
+    nacafac[id] = newcell->nacafac[0];
+    yshift[id] = newcell->yshift[0];
+    vssfac[id] = newcell->vssfac[0]; //
+    
+    iskfac[id] = newcell->iskfac[0];
+    skh[id] = newcell->skh[0];
+    skn[id] = newcell->skn[0];
+    alphask[id] = newcell->alphask[0];
+    xsk[id] = newcell->xsk[0];
+    tauffac[id] = newcell->tauffac[0];
+    taufshift[id] = newcell->taufshift[0];
+    naiclamp[id] = newcell->naiclamp[0]; //
+    kiclamp[id] = newcell->kiclamp[0]; //
+  
 }
 
 template <int ncells>
@@ -931,6 +1009,22 @@ void OHaraCell<ncells>::getcell (int id, OHaraCell<1>* newcell)
     newcell->inafac[0] = inafac[id];
     newcell->ikrfac[0] = ikrfac[id];
     newcell->iksfac[0] = iksfac[id];
+    
+    newcell->icalfac[0] = icalfac[id];
+    newcell->nacafac[0] = nacafac[id];
+    newcell->yshift[0] = yshift[id];
+    newcell->vssfac[0] = vssfac[id];
+    
+    newcell->iskfac[0] = iskfac[id];
+    newcell->skh[0] = skh[id];
+    newcell->skn[0] = skn[id];
+    newcell->alphask[0] = alphask[id];
+    newcell->xsk[0] = xsk[id];
+    newcell->tauffac[0] = tauffac[id];
+    newcell->taufshift[0] = taufshift[id];
+    
+    newcell->naiclamp[0] = naiclamp[id];
+    newcell->kiclamp[0] = kiclamp[id];
 }
 
 template <int ncells>

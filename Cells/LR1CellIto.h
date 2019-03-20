@@ -44,6 +44,8 @@ public:
     double tauXfac[ncells];
     
     double xr[ncells];
+    double tauyslowfac[ncells];
+    double typedestal[ncells];
     
     LR1CellIto();
     

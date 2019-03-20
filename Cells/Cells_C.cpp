@@ -4,6 +4,7 @@
 //#define slowito
 #include "LR1CellIto.cpp"
 //#undef slowito
+#include <math.h>
 
 extern "C"
 {
