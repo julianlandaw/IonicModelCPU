@@ -393,6 +393,7 @@ extern "C"
     }
 }
 
+#define EPI
 #include "TTCellIto.cpp"
 
 extern "C"
