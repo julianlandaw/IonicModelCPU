@@ -641,7 +641,7 @@ template <int ncells>
 void TTCellIto<ncells>::read(std::fstream& file) {
     file.read((char*)&this, sizeof(this) );
 }
-/*
+
 #undef ko 
 #undef cao 
 #undef nao 
@@ -693,7 +693,7 @@ void TTCellIto<ncells>::read(std::fstream& file) {
 #undef rtf
 //(RT)/F
 #undef gsk
-*/
+
 
 #endif // TTCellIto_cpp
 
