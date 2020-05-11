@@ -371,7 +371,7 @@ void LR2CellIto<ncells>::comp_ina (int id, double dt, double& dm, double& dh, do
     double ena, am, bm, ah, bh, aj, bj, mtau, htau, jtau, mss, hss, jss; 
     ena = ((R*temp)/frdy)*log(nao[id]/nai[id]); 
 
-    if (abs(v[id] + 47.13) < 1e-2) {
+    if (fabs(v[id] + 47.13) < 1e-2) {
         am = 0.32/0.1;    
     }
     else {
@@ -413,7 +413,7 @@ void LR2CellIto<ncells>::comp_ical (int id, double dt, double& dd, double& df, d
     double dss, taud, fss, tauf, fca, ibarca, ibarna, ibark, vfrt;
 #ifndef Miyoshi
     dss = 1.0/(1.0+exp(-(v[id]+10.0)/6.24)); 
-    if (abs(v[id] + 10.0) < 1e-2) {
+    if (fabs(v[id] + 10.0) < 1e-2) {
         taud = dss*1.0/(6.24*0.035);    
     }
     else {
@@ -436,7 +436,7 @@ void LR2CellIto<ncells>::comp_ical (int id, double dt, double& dd, double& df, d
     
     vfrt = v[id]*frdy/(R*temp);
     
-    if (abs(vfrt) < 1e-3) {
+    if (fabs(vfrt) < 1e-3) {
         ibarca = pca*zca*frdy*(gacai*cai[id]*exp(zca*vfrt) - gacao*cao[id])/(1.0 + (zca*vfrt)/2.0 + (zca*vfrt)*(zca*vfrt)/6.0 + (zca*vfrt)*(zca*vfrt)*(zca*vfrt)/24.0);
         ibarna = pna*zna*frdy*(ganai*nai[id]*exp(zna*vfrt) - ganao*nao[id])/(1.0 + (zna*vfrt)/2.0 + (zna*vfrt)*(zna*vfrt)/6.0 + (zna*vfrt)*(zna*vfrt)*(zna*vfrt)/24.0);
         ibark = pk*zk*frdy*(gaki*ki[id]*exp(zk*vfrt) - gako*ko[id])/(1.0 + (zk*vfrt)/2.0 + (zk*vfrt)*(zk*vfrt)/6.0 + (zk*vfrt)*(zk*vfrt)*(zk*vfrt)/24.0);
@@ -496,13 +496,13 @@ void LR2CellIto<ncells>::comp_ikr (int id, double dt, double& dxr, double& ikr)
 
     xrss = 1.0/(1.0+exp(-(v[id]+21.5)/7.5)); 
     tauxr = 0.0;
-    if (abs(v[id] + 14.2) < 1e-2) {
+    if (fabs(v[id] + 14.2) < 1e-2) {
         tauxr = tauxr + 1.0/(0.00138/0.123);    
     }
     else {
         tauxr = tauxr + 1.0/(0.00138*(v[id]+14.2)/(1.0-exp(-0.123*(v[id]+14.2))));
     }
-    if (abs(v[id] + 38.9) < 1e-2) {
+    if (fabs(v[id] + 38.9) < 1e-2) {
         tauxr = tauxr + 0.00061/0.145;    
     }
     else {
