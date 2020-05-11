@@ -136,6 +136,8 @@ TTCellIto<ncells>::TTCellIto()
         #else
         kiclamped[i] = false;
         #endif
+        
+        vcfac[i] = 1.0;
     }
 }
 
@@ -166,11 +168,11 @@ bool TTCellIto<ncells>::iterate(const int id, double dt, double st, double dv_ma
     comp_calcdyn(id, dt, ical, ibca, ipca, inaca, dg, dcasr, dcai);
 
     if (!naiclamped[id]) {
-        dnai = -(ina + ibna + 3.0*inak + 3.0*inaca)/(vc*frdy)*capacitance;
+        dnai = -(ina + ibna + 3.0*inak + 3.0*inaca)/((vcfac[id]*vc)*frdy)*capacitance;
         nai[id] += dnai*dt;
     }
     if (!kiclamped[id]) {
-        dki = -(ik1 + ito + isk + ikr + iks - 2.0*inak + ipk + st - diffcurrent[id])/(vc*frdy)*capacitance;
+        dki = -(ik1 + ito + isk + ikr + iks - 2.0*inak + ipk + st - diffcurrent[id])/((vcfac[id]*vc)*frdy)*capacitance;
         ki[id] += dki*dt;
     }
     
@@ -487,7 +489,8 @@ void TTCellIto<ncells>::comp_calcdyn (int id, double dt, double ical, double ibc
     double gss, icac, irel, ileak, iup, icasr, casrbuf, bjsr, cjsr, cabuf, bc, cc;
     
     gss = (cai[id] > 0.00035) ? 1.0/(1.0 + pow(cai[id]/0.00035,16.0)) : 1.0/(1.0 + pow(cai[id]/0.00035,6.0));
-    icac = -(ical + ibca + ipca - 2.0*inaca)/(zca*vc*frdy)*capacitance;
+    icac = -(ical + ibca + ipca - 2.0*inaca)/(zca*(vcfac[id]*vc)*frdy)*capacitance;
+    //icac = -(ical + ibca + ipca - 2.0*inaca)/(zca*vc*frdy)*capacitance; // NO CHANGE IN Ca VOLUME
     irel = (arel*casr[id]*casr[id]/(brelsq + casr[id]*casr[id]) + crel)*d[id]*g[id];
     
     dg = (g[id] < gss && v[id] > -60.0) ? 0.0 : (gss - (gss - g[id])*exp(-dt/taug) - g[id])/dt;
@@ -495,7 +498,8 @@ void TTCellIto<ncells>::comp_calcdyn (int id, double dt, double ical, double ibc
     iup = vmaxup/(1.0 + (kup/cai[id])*(kup/cai[id]));
     icasr = iup - irel - ileak;
     casrbuf = bufsr*casr[id]/(casr[id]+kbufsr);
-    dcasr = dt*(vc/vsr)*icasr;
+    //dcasr = dt*((vcfac[id]*vc)/vsr)*icasr;
+    dcasr = dt*(vc/vsr)*icasr; //NO CHANGE IN Ca VOLUME
     bjsr = bufsr - casrbuf - casr[id] - dcasr + kbufsr; //
     cjsr = kbufsr*(casrbuf+dcasr+casr[id]);
     if (cjsr < 0.0) {
@@ -554,6 +558,8 @@ void TTCellIto<ncells>::setcell (int id, TTCellIto<1>* newcell)
     
     naiclamped[id] = newcell->naiclamped[0];
     kiclamped[id] = newcell->kiclamped[0];
+    
+    vcfac[id] = newcell->vcfac[0];
 }
 
 template <int ncells>
@@ -597,6 +603,8 @@ void TTCellIto<ncells>::getcell (int id, TTCellIto<1>* newcell)
     
     newcell->naiclamped[0] = naiclamped[id];
     newcell->kiclamped[0] = kiclamped[id];
+    
+    newcell->vcfac[0] = vcfac[id];
 }
 
 template <int ncells>

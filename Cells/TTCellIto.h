@@ -65,6 +65,8 @@ public:
     bool naiclamped[ncells];
     bool kiclamped[ncells];
     
+    double vcfac[ncells];
+    
     TTCellIto();
     
     bool iterate(const int id, double dt, double st, double dv_max);
