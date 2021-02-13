@@ -5,6 +5,8 @@
 #include "LR1CellIto.cpp"
 //#undef slowito
 
+#include <stdlib.h>
+
 extern "C"
 {
     LR1CellIto<CELLS>* LR1CellIto_new() {
@@ -80,11 +82,11 @@ extern "C"
     }
     void LR1_setibarcafac(LR1CellIto<CELLS>* LR1Cell, int id, double ibarca) {
          if (id > -1 && id < CELLS) {
-             LR1Cell->ibarcafac[id] = ibarca;
+             LR1Cell->icalfac[id] = ibarca;
          }
     }
     void LR1_setibarcafacsing(LR1CellIto<1>* LR1Cell, double ibarca) {
-         LR1Cell->ibarcafac[0] = ibarca;
+         LR1Cell->icalfac[0] = ibarca;
     }
     
     
@@ -362,11 +364,11 @@ extern "C"
     }
     void LR1_nsca_setibarcafac(LR1CellIto_nsca<CELLS>* LR1Cell, int id, double ibarca) {
          if (id > -1 && id < CELLS) {
-             LR1Cell->ibarcafac[id] = ibarca;
+             LR1Cell->icalfac[id] = ibarca;
          }
     }
     void LR1_nsca_setibarcafacsing(LR1CellIto_nsca<1>* LR1Cell, double ibarca) {
-         LR1Cell->ibarcafac[0] = ibarca;
+         LR1Cell->icalfac[0] = ibarca;
     }
     
     void LR1_nsca_copycell(LR1CellIto_nsca<CELLS>* LR1Cell, int id, LR1CellIto_nsca<1>* LR1Cell2) {
