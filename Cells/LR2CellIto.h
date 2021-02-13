@@ -49,6 +49,7 @@ public:
     double iupfac[ncells]; //SERCA
     double ikrfac[ncells];
     double iksfac[ncells];
+    double ik1fac[ncells];
     double nacafac[ncells];
     double ikatpfac[ncells];
 

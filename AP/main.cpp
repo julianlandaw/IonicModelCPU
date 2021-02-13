@@ -70,6 +70,11 @@
 #endif
 #include "Cells/LR2CellIto.cpp"
 
+#elif Hund
+#define TYPECELL HundCell
+#define TYPECELLSTRING "Hund"
+#include "Cells/HundCell.cpp"
+
 #elif Fenton
 #define TYPECELL FentonCell
 #define TYPECELLSTRING "Fenton"
@@ -156,7 +161,8 @@ int main(int argc, char *argv[])
     h_cell->nai[0] = 12.0;
     h_cell->ikrfac[0] = 0.0;
     h_cell->iksfac[0] = 0.5;
-    h_cell->ibarcafac[0] = 1.0;
+    //h_cell->ibarcafac[0] = 1.0;
+    h_cell->ibarcafac[0] = 0.8;
     //h_cell->ibarcafac[0] = 6e-4/(gcal);
     //h_cell->ikrfac[0] = 0.01/(gkr);
     //h_cell->iksfac[0] = 0.036/(gks);
@@ -176,6 +182,14 @@ int main(int argc, char *argv[])
     h_cell->iskfac[0] = 0.0;
     h_cell->itofac[0] = 0.0;
     h_cell->iupfac[0] = 1.0;
+#endif
+    
+#ifdef Hund
+    h_cell->itofac[0] = 1.0;
+    h_cell->iksfac[0] = 1.0;
+    h_cell->ikrfac[0] = 1.0;
+    h_cell->inafac[0] = 1.0;
+    h_cell->icalfac[0] = 1.0;
 #endif
 #ifdef UCLA
     h_cell->itofac[0] = 1.0;
@@ -250,6 +264,10 @@ int main(int argc, char *argv[])
 #elif OHara
 	    ito = h_cell->comp_ito(0,dt,dxtos,dytos,dxtof,dytof,dxtof,dytof);
 	    isk = h_cell->comp_isk(0,dt,dytof);
+#elif Hund
+	    double aa, ito1, ito2;
+	    h_cell->comp_ito1(0,dt,aa,aa,aa,ito1);
+	    h_cell->comp_ito2(0,dt,aa,ito2);
 #else
 	    //h_cell->comp_ito(0,dt,dxtos,dytos,dxtof,dytof,ito);
 	    //h_cell->comp_isk(0,isk);
@@ -267,6 +285,9 @@ int main(int argc, char *argv[])
             h_cell->comp_iks(0,dt,dxs1,dxs2,iks);
 	    h_cell->comp_isk(0,dt,dxsk,isk);
 	    fprintf(ap,"%g\t%g\t%g\t%g\t%g\t%g\n",(double)t - t_savestart,h_cell->v[0],h_cell->cai[0],ito,isk,h_cell->ki[0]);
+#endif
+#ifdef Hund
+            fprintf(ap,"%g\t%g\t%g\t%g\t%g\t%g\t%g\n",(double)t - t_savestart,h_cell->v[0],h_cell->cai[0],h_cell->nai[0],h_cell->ki[0], ito1, ito2);
 #endif
 #ifdef TTSK
             fprintf(ap,"%g\t%g\t%g\t%g\t%g\n",(double)t - t_savestart,h_cell->v[0],h_cell->cai[0],ito,isk);

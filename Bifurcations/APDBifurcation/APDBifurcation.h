@@ -34,6 +34,7 @@ public:
     PRECTYPE nais[2*ncells*beats];
     PRECTYPE cais[2*ncells*beats];
     PRECTYPE casrs[2*ncells*beats];
+    PRECTYPE cpeaks[ncells*beats];
 #endif
 #ifdef UCLA
     //PRECTYPE kis[2*ncells*beats];

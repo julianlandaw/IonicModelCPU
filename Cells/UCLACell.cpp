@@ -126,6 +126,7 @@ UCLACell<ncells>::UCLACell()
         itoslowfac[i] = 1.0;
         ikrfac[i] = 1.0;
         iksfac[i] = 1.0;
+	ik1fac[i] = 1.0;
         nacafac[i] = 1.0;
         icalfac[i] = 1.0;
         // SK variables. default is SK current = 0
@@ -403,7 +404,7 @@ double UCLACell<ncells>::comp_ik1 (int id)
     aki = 1.02/(1.0 + exp(0.2385*(v[id] - ek - 59.215)));
     bki = (0.49124*exp(0.08032*(v[id] - ek + 5.465)) + exp(0.061750*(v[id] - ek - 594.31)))/(1.0 + exp(-0.5143*(v[id] - ek + 4.753)));
     xkin = aki/(aki + bki);
-    xik1 = gkix*gki*xkin*(v[id] - ek);
+    xik1 = ik1fac[id]*gkix*gki*xkin*(v[id] - ek);
     return xik1;
 }
 
@@ -754,6 +755,7 @@ void UCLACell<ncells>::setcell (int id, UCLACell<1>* newcell)
     itofac[id] = newcell->itofac[0];
     ikrfac[id] = newcell->ikrfac[0];
     iksfac[id] = newcell->iksfac[0];
+    ik1fac[id] = newcell->ik1fac[0];
     nacafac[id] = newcell->nacafac[0];
     icalfac[id] = newcell->icalfac[0]; //
 
@@ -807,6 +809,7 @@ void UCLACell<ncells>::getcell (int id, UCLACell<1>* newcell)
     newcell->itoslowfac[0] = itoslowfac[id];
     newcell->ikrfac[0] = ikrfac[id];
     newcell->iksfac[0] = iksfac[id];
+    newcell->ik1fac[0] = ik1fac[id];
     newcell->nacafac[0] = nacafac[id];
     newcell->icalfac[0] = icalfac[id];
 

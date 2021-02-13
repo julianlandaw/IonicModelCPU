@@ -17,7 +17,7 @@ gnaped = 0.0
 
 default: all
 
-all: LR1ap LR2ap TTap TTHopen LR1SKap TTSKap LR1Mod TTMod UCLAap OHaraap TP06ap
+all: LR1ap LR2ap TTap TTHopen LR1SKap TTSKap LR1Mod TTMod UCLAap OHaraap TP06ap Hundap
 
 LR1ap:
 	$(CC) $(FLAGS) $(OBJECTS) -o LR1$(EXECUTABLE) -D LR1 -D BEATS=${BEATS} -D REMOVEBEATS=${REMOVEBEATS} -D PRECTYPE=${PRECTYPE} -D VARIABLE1=${VARIABLE1} -D VARIABLE2=${VARIABLE2} -D stimulus=-30.0 -D stimduration=2.0
@@ -26,7 +26,7 @@ LR2ap:
 	$(CC) $(FLAGS) $(OBJECTS) -o LR2$(EXECUTABLE) -D LR2 -D BEATS=${BEATS} -D REMOVEBEATS=${REMOVEBEATS} -D PRECTYPE=${PRECTYPE} -D VARIABLE1=${VARIABLE1} -D VARIABLE2=${VARIABLE2} -D stimulus=-38.0 -D stimduration=2.0
 
 TTap:
-	$(CC) $(FLAGS) $(OBJECTS) -o TT$(EXECUTABLE) -D TT -D BEATS=${BEATS} -D REMOVEBEATS=${REMOVEBEATS} -D VARIABLE1=${VARIABLE1} -D VARIABLE2=${VARIABLE2} -D clampki -D xiaodong -D noslowito -D stimulus=-26.0 -D stimduration=2.0 -D gnaped=${gnaped}
+	$(CC) $(FLAGS) $(OBJECTS) -o TT$(EXECUTABLE) -D TT -D BEATS=${BEATS} -D REMOVEBEATS=${REMOVEBEATS} -D VARIABLE1=${VARIABLE1} -D VARIABLE2=${VARIABLE2} -D clampki -D xiaodong -D noslowito -D stimulus=-26.0 -D stimduration=2.0 -D gnaped=${gnaped} -D EPI
 
 TP06ap:
 	$(CC) $(FLAGS) $(OBJECTS) -o TP06$(EXECUTABLE) -D TP06 -D BEATS=${BEATS} -D REMOVEBEATS=${REMOVEBEATS} -D VARIABLE1=${VARIABLE1} -D VARIABLE2=${VARIABLE2} -D stimulus=-52.0 -D stimduration=2.0 -D EPI
@@ -58,6 +58,9 @@ UCLAap:
     
 OHaraap:	
 	$(CC) $(FLAGS) $(OBJECTS) -o OHara$(EXECUTABLE) -D OHara -D BEATS=${BEATS} -D REMOVEBEATS=${REMOVEBEATS} -D noslowito -D VARIABLE1=${VARIABLE1} -D VARIABLE2=${VARIABLE2} -D stimulus=-34.0 -D stimduration=2.0
+
+Hundap:
+	$(CC) $(FLAGS) $(OBJECTS) -o Hund$(EXECUTABLE) -D Hund -D BEATS=${BEATS} -D REMOVEBEATS=${REMOVEBEATS} -D VARIABLE1=${VARIABLE1} -D VARIABLE2=${VARIABLE2} -D stimulus=-80.0 -D stimduration=1.0
 
 clean:
 	-rm -f *$(BIFEXECUTABLE) *$(RESTEXECUTABLE)

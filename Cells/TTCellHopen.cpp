@@ -1,5 +1,5 @@
 //
-//  TTCellIto.cpp
+//  TTCellHopen.cpp
 //
 //  Implementation of the ten Tusscher model, with UCLA Ito
 //  Created by Julian Landaw on 12/25/16.
@@ -7,10 +7,10 @@
 //
 #include <math.h>
 #include <fstream>
-#include "TTCellIto.h"
+#include "TTCellHopen.h"
 
-#ifndef TTCellIto_cpp
-#define TTCellIto_cpp
+#ifndef TTCellHopen_cpp
+#define TTCellHopen_cpp
 
 #define ko 5.4
 #define cao 2.0
@@ -26,9 +26,21 @@
 #define vmaxup 0.000425
 #define kup 0.00025
 #define capacitance 0.185
-#define gitodv 0.2
+//#define gitodv 0.2
 #define gkr 0.096
+
+//#define gks 0.245
+
+#ifdef EPI
 #define gks 0.245
+#endif
+#ifdef ENDO
+#define gks 0.245
+#endif
+#ifdef MCELL
+#define gks 0.062
+#endif
+
 #define pkna 0.03
 #define gk1 5.405
 #define gna 14.838
@@ -85,7 +97,7 @@
 #endif
 
 template <int ncells>
-TTCellIto<ncells>::TTCellIto()
+TTCellHopen<ncells>::TTCellHopen()
 {
     for (int i = 0; i < ncells; i++) {
         v[i] = -86.2;
@@ -112,19 +124,19 @@ TTCellIto<ncells>::TTCellIto()
         ibarcafac[i] = 1.0;
         ikrfac[i] = 1.0;
         iksfac[i] = 1.0;
-	ik1fac[i] = 1.0;
+        
+        //ito new variables
+        rinfshift[i] = 0.0;
+        sinfshift[i] = 0.0;
+        taurshift[i] = 0.0;
+        tausshift[i] = 0.0;
         
         // SK Variables
         iskfac[i] = 0.0;
         skh[i] = 0.008;
         skn[i] = 4;
         
-        #ifndef UCLAito
-        rinfshift[i] = 0.0;
-        sinfshift[i] = 0.0;
-        taurshift[i] = 0.0;
-        tausshift[i] = 0.0;
-        #endif
+        ikatpfac[i] = 1.0;
         
         // Na and K clamp variables;
         #ifdef clampnai
@@ -137,16 +149,14 @@ TTCellIto<ncells>::TTCellIto()
         #else
         kiclamped[i] = false;
         #endif
-        
-        vcfac[i] = 1.0;
     }
 }
 
 template <int ncells>
-bool TTCellIto<ncells>::iterate(const int id, double dt, double st, double dv_max) {
+bool TTCellHopen<ncells>::iterate(const int id, double dt, double st, double dv_max) {
     double dm, dh, dj, dd, df, dfca, dzdv, dydv, dxs, dxr1, dxr2, dg;
     double dcai, dcasr, dnai, dki, dv;
-    double ina, ical, ito, iks, isk, ikr, ik1, inaca, inak, ipca, ipk, ibna, ibca;
+    double ina, ical, ito, iks, isk, ikr, ik1, ikatp, inaca, inak, ipca, ipk, ibna, ibca;
     
     ina = comp_ina(id, dt, dm, dh, dj);         // fast sodium current
     ical = comp_ical(id, dt, dd, df, dfca);     // window current
@@ -155,13 +165,14 @@ bool TTCellIto<ncells>::iterate(const int id, double dt, double st, double dv_ma
     iks = comp_iks(id, dt, dxs);                // Slow rectifying K current
     ikr = comp_ikr(id, dt, dxr1, dxr2);         // Rapid rectifying K current
     ik1 = comp_ik1(id);                         // IK current
+    ikatp = comp_ikatp(id);                     // ATP-sensitive K channel
     inaca = comp_inaca(id);                     // Sodium-Ca exchanger
     inak = comp_inak(id);                       // Na-K pump
     ipk = comp_ipk(id);                         // Background K current
     ipca = comp_ipca(id);                       // Background Ca current
     ibca = comp_ibca(id);                       // ... Another background Ca current
     ibna = comp_ibna(id);                       // Background Na current
-    dv = (diffcurrent[id] - (ikr + iks + isk + ik1 + ito + ina + ibna + ical + ibca + inak + inaca + ipca + ipk + st))*dt;
+    dv = (diffcurrent[id] - (ikr + iks + isk + ik1 + ito + ikatp + ina + ibna + ical + ibca + inak + inaca + ipca + ipk + st))*dt;
     
     // Comment out if one would like to avoid using a dynamic step size that checks for dv being too big
     if (dv_max > 0 && dv*dv > dv_max*dv_max) {return false;}
@@ -169,11 +180,11 @@ bool TTCellIto<ncells>::iterate(const int id, double dt, double st, double dv_ma
     comp_calcdyn(id, dt, ical, ibca, ipca, inaca, dg, dcasr, dcai);
 
     if (!naiclamped[id]) {
-        dnai = -(ina + ibna + 3.0*inak + 3.0*inaca)/((vcfac[id]*vc)*frdy)*capacitance;
+        dnai = -(ina + ibna + 3.0*inak + 3.0*inaca)/(vc*frdy)*capacitance;
         nai[id] += dnai*dt;
     }
     if (!kiclamped[id]) {
-        dki = -(ik1 + ito + isk + ikr + iks - 2.0*inak + ipk + st - diffcurrent[id])/((vcfac[id]*vc)*frdy)*capacitance;
+        dki = -(ik1 + ito + isk + ikr + iks + ikatp - 2.0*inak + ipk + st - diffcurrent[id])/(vc*frdy)*capacitance;
         ki[id] += dki*dt;
     }
     
@@ -199,7 +210,7 @@ bool TTCellIto<ncells>::iterate(const int id, double dt, double st, double dv_ma
 }
 
 template <int ncells>
-void TTCellIto<ncells>::stepdt (const int id, double dt, double st) {
+void TTCellHopen<ncells>::stepdt (const int id, double dt, double st) {
     if (id > -1 && id < ncells) {
         bool success = iterate(id, dt, st, DV_MAX);
         if (!success) {
@@ -215,7 +226,7 @@ void TTCellIto<ncells>::stepdt (const int id, double dt, double st) {
 #endif
 
 template <int ncells>
-double TTCellIto<ncells>::comp_ina (int id, double dt, double& dm, double& dh, double& dj) //Fast Sodium Current
+double TTCellHopen<ncells>::comp_ina (int id, double dt, double& dm, double& dh, double& dj) //Fast Sodium Current
 {
     double ena, mtau, htau, jtau, mss, hss, ina;
     
@@ -249,7 +260,7 @@ double TTCellIto<ncells>::comp_ina (int id, double dt, double& dm, double& dh, d
 }
 
 template <int ncells>
-double TTCellIto<ncells>::comp_ical (int id, double dt, double& dd, double& df, double& dfca) // L-type Calcium Current
+double TTCellHopen<ncells>::comp_ical (int id, double dt, double& dd, double& df, double& dfca) // L-type Calcium Current
 {
 #ifdef xiaodong    
     double taud, tauf, dss, fss, fcass, ical, vfrt;
@@ -305,33 +316,19 @@ double TTCellIto<ncells>::comp_ical (int id, double dt, double& dd, double& df, 
     return ical;
 }
 
+#ifdef EPI
+double Gto=0.294;
+#endif
+#ifdef ENDO
+double Gto=0.073;
+#endif
+#ifdef MCELL
+double Gto=0.294;
+#endif
+
 template <int ncells>
-double TTCellIto<ncells>::comp_ito (int id, double dt, double& dzdv, double& dydv)
+double TTCellHopen<ncells>::comp_ito (int id, double dt, double& dzdv, double& dydv)
 {
-    #ifdef UCLAito
-    double ek, zssdv, tauzdv, yssdv, tauydv, ito;
-    
-    ek = (rtf/zk)*log(ko/ki[id]);
-    
-    zssdv = 1.0/(1.0 + exp(-(v[id] + 3.0)/15.0));
-    tauzdv = 3.5*exp(-(v[id]/30.0)*(v[id]/30.0))+1.5;
-    
-    yssdv = 1.0/(1.0+exp((v[id] +33.5)/10.0));
-    tauydv = 20.0/(1.0+exp((v[id] +33.5)/10.0)) + 20.0;
-    
-    ito = itofac[id]*gitodv*zdv[id]*ydv[id]*(v[id]-ek);
-    
-    dzdv = (zssdv-(zssdv-zdv[id])*exp(-dt/tauzdv) - zdv[id])/dt;
-    dydv = (yssdv-(yssdv-ydv[id])*exp(-dt/tauydv) - ydv[id])/dt;
-    
-    return ito;
-    #else
-    #ifdef ENDO
-    double Gto=0.073;
-    #else
-    double Gto = 0.294;
-    #endif
-    
     double R_INF, S_INF, TAU_R, TAU_S, ek, ito;
     
     ek = (rtf/zk)*log(ko/ki[id]);
@@ -361,11 +358,55 @@ double TTCellIto<ncells>::comp_ito (int id, double dt, double& dzdv, double& dyd
     dydv = (S_INF - (S_INF - ydv[id])*exp(-dt/TAU_S) - ydv[id])/dt;
     
     return ito;
-    #endif
+    
+    /*
+    double ek, zssdv, tauzdv, yssdv, tauydv, ito;
+    
+    ek = (rtf/zk)*log(ko/ki[id]);
+    
+    zssdv = 1.0/(1.0 + exp(-(v[id] + 3.0)/15.0));
+    tauzdv = 3.5*exp(-(v[id]/30.0)*(v[id]/30.0))+1.5;
+    
+    yssdv = 1.0/(1.0+exp((v[id] +33.5)/10.0));
+    tauydv = 20.0/(1.0+exp((v[id] +33.5)/10.0)) + 20.0;
+    
+    ito = itofac[id]*gitodv*zdv[id]*ydv[id]*(v[id]-ek);
+    
+    dzdv = (zssdv-(zssdv-zdv[id])*exp(-dt/tauzdv) - zdv[id])/dt;
+    dydv = (yssdv-(yssdv-ydv[id])*exp(-dt/tauydv) - ydv[id])/dt;
+    
+    return ito;
+    */
 }
 
+/* ATP-Sensitive K Channel */ 
+    #define natp 0.24
+    #define nicholsarea 0.00005
+    #define atpi 3.0
+    #define hatp 2.0
+    #define katp 0.250
+
 template <int ncells>
-double TTCellIto<ncells>::comp_isk (int id)
+double TTCellHopen<ncells>::comp_ikatp (int id) 
+{ 
+/* Note: If you wish to use this current in your simulations, there are additional */ 
+/* changes which must be made to the code as detailed in Cardiovasc Res 1997;35:256-272 */ 
+    //double ekatp, gkatp, patp, gkbaratp, ikatp;
+    double ekatp;
+    ekatp = (rtf/zk)*log(ko/ki[id]);
+    
+    //gkatp = 0.000195/nicholsarea; 
+    //patp = 1.0/(1.0+(pow((atpi/katp),hatp))); 
+    //gkbaratp = gkatp*patp*(pow((ko/4.0),natp)); 
+
+    ikatp = ikatpfac[id]*0.017*(v[id] - ekatp);
+    //ikatp = ikatpfac[id]*gkbaratp*(v[id]-ekatp); 
+    
+    return ikatp;
+} 
+
+template <int ncells>
+double TTCellHopen<ncells>::comp_isk (int id)
 {
     double isk, ek, z;
     z = 1.0/(1.0 + pow(skh[id]/cai[id],skn[id]));
@@ -377,7 +418,7 @@ double TTCellIto<ncells>::comp_isk (int id)
 }
 
 template <int ncells>
-double TTCellIto<ncells>::comp_iks (int id, double dt, double& dxs)
+double TTCellHopen<ncells>::comp_iks (int id, double dt, double& dxs)
 {
     double eks, xsss, tauxs, iks;
     
@@ -393,7 +434,7 @@ double TTCellIto<ncells>::comp_iks (int id, double dt, double& dxs)
 }
 
 template <int ncells>
-double TTCellIto<ncells>::comp_ikr (int id, double dt, double& dxr1, double& dxr2)
+double TTCellHopen<ncells>::comp_ikr (int id, double dt, double& dxr1, double& dxr2)
 {
     double ek, axr1, bxr1, axr2, bxr2, tauxr1, tauxr2, xr1ss, xr2ss, ikr;
     
@@ -420,19 +461,19 @@ double TTCellIto<ncells>::comp_ikr (int id, double dt, double& dxr1, double& dxr
 }
 
 template <int ncells>
-double TTCellIto<ncells>::comp_ik1 (int id)
+double TTCellHopen<ncells>::comp_ik1 (int id)
 {
     double ek, ak1, bk1, xk1ss, ik1;
     ek = (rtf/zk)*log(ko/ki[id]);
     ak1 = 0.1/(1.0 + exp(0.06*(v[id] - ek - 200.0)));
     bk1 = 3.0*exp(0.0002*(v[id] - ek + 100.0)) + exp(0.1*(v[id] - ek - 10.0))/(1.0 + exp(-0.5*(v[id] - ek)));
     xk1ss = ak1/(ak1 + bk1);
-    ik1 = ik1fac[id]*gk1*sqrt(ko/5.4)*xk1ss*(v[id] - ek);
+    ik1 = gk1*sqrt(ko/5.4)*xk1ss*(v[id] - ek);
     return ik1;
 }
 
 template <int ncells>
-double TTCellIto<ncells>::comp_inaca (int id)
+double TTCellHopen<ncells>::comp_inaca (int id)
 {
     double inaca;
     inaca = nacafac[id]*knaca*(exp(gamma*v[id]*frt)*nai[id]*nai[id]*nai[id]*cao - exp((gamma-1.0)*v[id]*frt)*nao*nao*nao*cai[id]*alpha)/((kmnai*kmnai*kmnai + nao*nao*nao)*(kmca + cao)*(1.0 + ksat*exp((gamma-1.0)*v[id]*frt)));
@@ -441,7 +482,7 @@ double TTCellIto<ncells>::comp_inaca (int id)
 }
 
 template <int ncells>
-double TTCellIto<ncells>::comp_inak (int id)
+double TTCellHopen<ncells>::comp_inak (int id)
 {
     double inak;
     inak = nakfac[id]*knak*ko*nai[id]/((ko+kmk)*(nai[id]+kmna)*(1.0 + 0.1245*exp(-0.1*v[id]*frt) + 0.0353*exp(-v[id]*frt)));
@@ -450,7 +491,7 @@ double TTCellIto<ncells>::comp_inak (int id)
 }
 
 template <int ncells>
-double TTCellIto<ncells>::comp_ipca (int id)
+double TTCellHopen<ncells>::comp_ipca (int id)
 {
     double ipca;
     ipca = gpca*cai[id]/(kpca + cai[id]);
@@ -458,7 +499,7 @@ double TTCellIto<ncells>::comp_ipca (int id)
 }
 
 template <int ncells>
-double TTCellIto<ncells>::comp_ipk (int id)
+double TTCellHopen<ncells>::comp_ipk (int id)
 {
     double ipk, ek;
     ek = (rtf/zk)*log(ko/ki[id]);
@@ -467,7 +508,7 @@ double TTCellIto<ncells>::comp_ipk (int id)
 }
 
 template <int ncells>
-double TTCellIto<ncells>::comp_ibna (int id)
+double TTCellHopen<ncells>::comp_ibna (int id)
 {
     double ena, ibna;
     ena = (rtf/zna)*log(nao/nai[id]);
@@ -476,7 +517,7 @@ double TTCellIto<ncells>::comp_ibna (int id)
 }
 
 template <int ncells>
-double TTCellIto<ncells>::comp_ibca (int id)
+double TTCellHopen<ncells>::comp_ibca (int id)
 {
     double eca, ibca;
     eca = (rtf/zca)*log(cao/cai[id]);
@@ -485,13 +526,12 @@ double TTCellIto<ncells>::comp_ibca (int id)
 }
 
 template <int ncells>
-void TTCellIto<ncells>::comp_calcdyn (int id, double dt, double ical, double ibca, double ipca, double inaca, double &dg, double &dcasr, double &dcai) // MAKE SURE THIS IS COMPUTED AFTER ALL OTHER CURRENTS
+void TTCellHopen<ncells>::comp_calcdyn (int id, double dt, double ical, double ibca, double ipca, double inaca, double &dg, double &dcasr, double &dcai) // MAKE SURE THIS IS COMPUTED AFTER ALL OTHER CURRENTS
 {
     double gss, icac, irel, ileak, iup, icasr, casrbuf, bjsr, cjsr, cabuf, bc, cc;
     
     gss = (cai[id] > 0.00035) ? 1.0/(1.0 + pow(cai[id]/0.00035,16.0)) : 1.0/(1.0 + pow(cai[id]/0.00035,6.0));
-    icac = -(ical + ibca + ipca - 2.0*inaca)/(zca*(vcfac[id]*vc)*frdy)*capacitance;
-    //icac = -(ical + ibca + ipca - 2.0*inaca)/(zca*vc*frdy)*capacitance; // NO CHANGE IN Ca VOLUME
+    icac = -(ical + ibca + ipca - 2.0*inaca)/(zca*vc*frdy)*capacitance;
     irel = (arel*casr[id]*casr[id]/(brelsq + casr[id]*casr[id]) + crel)*d[id]*g[id];
     
     dg = (g[id] < gss && v[id] > -60.0) ? 0.0 : (gss - (gss - g[id])*exp(-dt/taug) - g[id])/dt;
@@ -499,8 +539,7 @@ void TTCellIto<ncells>::comp_calcdyn (int id, double dt, double ical, double ibc
     iup = vmaxup/(1.0 + (kup/cai[id])*(kup/cai[id]));
     icasr = iup - irel - ileak;
     casrbuf = bufsr*casr[id]/(casr[id]+kbufsr);
-    //dcasr = dt*((vcfac[id]*vc)/vsr)*icasr;
-    dcasr = dt*(vc/vsr)*icasr; //NO CHANGE IN Ca VOLUME
+    dcasr = dt*(vc/vsr)*icasr;
     bjsr = bufsr - casrbuf - casr[id] - dcasr + kbufsr; //
     cjsr = kbufsr*(casrbuf+dcasr+casr[id]);
     if (cjsr < 0.0) {
@@ -520,7 +559,7 @@ void TTCellIto<ncells>::comp_calcdyn (int id, double dt, double ical, double ibc
 }
 
 template <int ncells>
-void TTCellIto<ncells>::setcell (int id, TTCellIto<1>* newcell)
+void TTCellHopen<ncells>::setcell (int id, TTCellHopen<1>* newcell)
 {
     v[id] = newcell->v[0];
     nai[id] = newcell->nai[0];
@@ -541,31 +580,23 @@ void TTCellIto<ncells>::setcell (int id, TTCellIto<1>* newcell)
     ydv[id] = newcell->ydv[0];
     diffcurrent[id] = newcell->diffcurrent[0];
     itofac[id] = newcell->itofac[0];
-    ibarcafac[id] = newcell->ibarcafac[0]; //
     nacafac[id] = newcell->nacafac[0];
     nakfac[id] = newcell->nakfac[0];
     ikrfac[id] = newcell->ikrfac[0];
     iksfac[id] = newcell->iksfac[0];
-    ik1fac[id] = newcell->ik1fac[0];
     
     iskfac[id] = newcell->iskfac[0];
     skh[id] = newcell->skh[0];
     skn[id] = newcell->skn[0];
-    #ifndef UCLAito
-    rinfshift[id] = newcell->rinfshift[0];
-    sinfshift[id] = newcell->sinfshift[0];
-    taurshift[id] = newcell->taurshift[0];
-    tausshift[id] = newcell->tausshift[0];
-    #endif
+    
+    ikatpfac[id] = newcell->ikatpfac[0];
     
     naiclamped[id] = newcell->naiclamped[0];
     kiclamped[id] = newcell->kiclamped[0];
-    
-    vcfac[id] = newcell->vcfac[0];
 }
 
 template <int ncells>
-void TTCellIto<ncells>::getcell (int id, TTCellIto<1>* newcell)
+void TTCellHopen<ncells>::getcell (int id, TTCellHopen<1>* newcell)
 {
     newcell->v[0] = v[id];
     newcell->nai[0] = nai[id];
@@ -590,28 +621,19 @@ void TTCellIto<ncells>::getcell (int id, TTCellIto<1>* newcell)
     newcell->nakfac[0] = nakfac[id];
     newcell->ikrfac[0] = ikrfac[id];
     newcell->iksfac[0] = iksfac[id];
-    newcell->ik1fac[0] = ik1fac[id];
-    newcell->ibarcafac[0] = ibarcafac[id];
     
     newcell->iskfac[0] = iskfac[id];
     newcell->skh[0] = skh[id];
     newcell->skn[0] = skn[id];
     
-    #ifndef UCLAito
-    newcell->rinfshift[0] = rinfshift[id];
-    newcell->sinfshift[0] = sinfshift[id];
-    newcell->taurshift[0] = taurshift[id];
-    newcell->tausshift[0] = tausshift[id];
-    #endif
+    newcell->ikatpfac[0] = ikatpfac[id];
     
     newcell->naiclamped[0] = naiclamped[id];
     newcell->kiclamped[0] = kiclamped[id];
-    
-    newcell->vcfac[0] = vcfac[id];
 }
 
 template <int ncells>
-void TTCellIto<ncells>::saveconditions(FILE* file, int id, bool header, double t) {
+void TTCellHopen<ncells>::saveconditions(FILE* file, int id, bool header, double t) {
     if (header) {
         fprintf(file,"t\tv\tm\th\tj\td\tf\tfca\tzdv\tydv\txs\txr1\txr2\tg\tcai\tcasr\tnai\tki\n");
     }
@@ -636,12 +658,12 @@ void TTCellIto<ncells>::saveconditions(FILE* file, int id, bool header, double t
 }
 
 template <int ncells>
-void TTCellIto<ncells>::write(std::fstream& file) {
+void TTCellHopen<ncells>::write(std::fstream& file) {
     file.write((char*)&this, sizeof(this) );
 }
 
 template <int ncells>
-void TTCellIto<ncells>::read(std::fstream& file) {
+void TTCellHopen<ncells>::read(std::fstream& file) {
     file.read((char*)&this, sizeof(this) );
 }
 /*
@@ -698,5 +720,5 @@ void TTCellIto<ncells>::read(std::fstream& file) {
 #undef gsk
 */
 
-#endif // TTCellIto_cpp
+#endif // TTCellHopen_cpp
 

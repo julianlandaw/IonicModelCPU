@@ -1,17 +1,17 @@
 //
-//  TTCellIto.h
+//  TTCellHopen.h
 //
 //  Implementation of the ten Tusscher model, with UCLA Ito
 //  Created by Julian Landaw on 12/25/16.
 //  Copyright © 2016 Julian Landaw. All rights reserved.
 //
-#ifndef TTCellIto_h
-#define TTCellIto_h
+#ifndef TTCellHopen_h
+#define TTCellHopen_h
 
 #include <fstream>
 
 template <int ncells>
-class TTCellIto
+class TTCellHopen
 {
 public:
     double v[ncells]; //Membrane voltage
@@ -41,7 +41,6 @@ public:
     double ibarcafac[ncells];
     double ikrfac[ncells];
     double iksfac[ncells];
-    double ik1fac[ncells];
     
     double xs[ncells];
     
@@ -55,20 +54,19 @@ public:
     double skh[ncells];
     double skn[ncells];
     
-    #ifndef UCLAito
+    double ikatpfac[ncells];
+    
+    //ito new variables
     double rinfshift[ncells];
     double sinfshift[ncells];
     double taurshift[ncells];
     double tausshift[ncells];
-    #endif
     
     // Na and K clamp variables
     bool naiclamped[ncells];
     bool kiclamped[ncells];
     
-    double vcfac[ncells];
-    
-    TTCellIto();
+    TTCellHopen();
     
     bool iterate(const int id, double dt, double st, double dv_max);
     
@@ -79,6 +77,8 @@ public:
     double comp_ical (int id, double dt, double& dd, double& df, double& dfca); // L-type Calcium Current
     
     double comp_ito (int id, double dt, double& dzdv, double& dydv);
+    
+    double comp_ikatp (int id);
     
     double comp_isk (int id);  // SK current
     
@@ -102,9 +102,9 @@ public:
     
     void comp_calcdyn (int id, double dt, double ical, double ibca, double ipca, double inaca, double& dg, double& dcasr, double& dcai); // MAKE SURE THIS IS COMPUTED AFTER ALL OTHER CURRENTS
     
-    void setcell (int id, TTCellIto<1>* newcell);
+    void setcell (int id, TTCellHopen<1>* newcell);
     
-    void getcell (int id, TTCellIto<1>* newcell);
+    void getcell (int id, TTCellHopen<1>* newcell);
     
     void saveconditions(FILE* file, int id, bool header, double t=0.0);
     
@@ -114,5 +114,5 @@ public:
     
 };
 
-#endif // TTCellIto_h
+#endif // TTCellHopen_h
 

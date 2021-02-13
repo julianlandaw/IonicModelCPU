@@ -130,24 +130,31 @@
 #endif
 
 #ifndef VARIABLE1
-#define VARIABLE1 itofac
+#define VARIABLE1 icalfac
 #endif
 
 #ifndef VARIABLE2
-#define VARIABLE2 tauXfac
+#define VARIABLE2 ikrfac
+#endif
+
+#ifndef VARIABLE3
+#define VARIABLE3 iksfac
+#endif
+
+#ifndef VARIABLE4
+#define VARIABLE4 ik1fac
 #endif
 
 #include "APDBifurcation.cpp"
 
 int main(int argc, char *argv[])
 {
-    const double minvar1 = atof(argv[1]);
-    const double maxvar1 = atof(argv[2]);
-    const double minvar2 = atof(argv[3]);
-    const double maxvar2 = atof(argv[4]);
-    const double minpcl = atof(argv[5]);
-    const double maxpcl = atof(argv[6]);
-    const long double dt = atof(argv[7]);
+    const double var1 = atof(argv[1]);
+    const double var2 = atof(argv[2]);
+    const double var3 = atof(argv[3]);
+    const double var4 = atof(argv[4]);
+    const double pcl = atof(argv[5]);
+    const long double dt = atof(argv[6]);
     
     	#ifdef LR1
     double _itofac = 0.0; //1.0;
@@ -160,7 +167,7 @@ int main(int argc, char *argv[])
         #ifdef LR2
     double _itofac = 0.0;
     double _iskfac = 0.0;
-    double _iupfac = 3.0; //3.0; //3.0;
+    double _iupfac = 1.0; //3.0; //3.0;
     double _skh = 0.002; //0.0025
     double _tauyfac = 1.0;
     //double _nai = 20.0;
@@ -169,13 +176,13 @@ int main(int argc, char *argv[])
         #ifdef TT
     double _itofac = 0.0;
     double _iskfac = 0.0;
-    double _nai = 12.0;
-    double _ki = 138.0;
-    double _nacafac = 5.0; //5.75;
+    //double _nai = 12.0;
+    //double _ki = 138.0;
+    double _nacafac = 1.0; //5.75;
 
     double _ikrfac = 0.0; //1.0;
-    double _iksfac = 0.5;
-    double _icalfac = 0.8; //1.0;
+    double _iksfac = 1;
+    double _icalfac = 1; //1.0;
     //double _ikrfac = 0.01/(gkr);  //1.0;
     //double _iksfac = 0.036/(gks); //1.0;
     //double _icalfac = 0.0006/(gcal); //1.0;
@@ -200,19 +207,15 @@ int main(int argc, char *argv[])
     double _iksfac = 1.0;
         #endif
         #ifdef UCLA
-    double _itofac = 1.0;
+    double _itofac = 0.0;
     double _iskfac = 0.0;
     double _skh = 2.0;
     double _icalfac = 1.0;
     double _ikrfac = 1.0;
     double _iksfac = 1.0;
     double _nai = 12.0;
-    double _nacafac = 0.3;//1.0;
+    double _nacafac = 1.0;//1.0;
         #endif
-    
-    double byvar1 = (numvar1 > 1) ? (maxvar1 - minvar1)/(numvar1 - 1) : 1;
-    double byvar2 = (numvar2 > 1) ? (maxvar2 - minvar2)/(numvar1 - 1) : 1;
-    double bypcl = (numpcl > 1) ? (maxpcl - minpcl)/(numpcl - 1) : 1;
     
     APDBifurcation<TYPECELL, NCELLS, BEATS>* h_cells;
     
@@ -221,128 +224,133 @@ int main(int argc, char *argv[])
     
     FILE *allbifs;
     char fileSpec1[100];
-    snprintf(fileSpec1, 100, "%sbifsPCL_%g_VAR1_%g_VAR2_%g.txt", TYPECELLSTRING, minpcl, minvar1,minvar2);
+    snprintf(fileSpec1, 100, "%sbifsPCL_%g_VAR1_%g_VAR2_%g_VAR3_%g_VAR4_%g.txt", TYPECELLSTRING, pcl, var1, var2, var3, var4);
     allbifs = fopen(fileSpec1, "w");
     
     
 #ifdef LR1
     FILE *xrbifs;
     char fileSpec2[100];
-    snprintf(fileSpec2, 100, "%sXrPCL_%g_VAR1_%g_VAR2_%g.txt", TYPECELLSTRING, minpcl, minvar1,minvar2);
+    snprintf(fileSpec2, 100, "%sXrPCL_%g_VAR1_%g_VAR2_%g_VAR3_%g_VAR4_%g.txt", TYPECELLSTRING, pcl, var1, var2, var3, var4);
     xrbifs = fopen(fileSpec2, "w");
 
     FILE *ytosbifs;
     char fileSpec3[100];
-    snprintf(fileSpec3, 100, "%sYtosPCL_%g_VAR1_%g_VAR2_%g.txt", TYPECELLSTRING, minpcl, minvar1, minvar2);
+    snprintf(fileSpec3, 100, "%sYtosPCL_%g_VAR1_%g_VAR2_%g_VAR3_%g_VAR4_%g.txt", TYPECELLSTRING, pcl, var1, var2, var3, var4);
     ytosbifs = fopen(fileSpec3, "w");
 #endif
     
 #ifdef LR1_taud
     FILE *xrbifs;
     char fileSpec2[100];
-    snprintf(fileSpec2, 100, "%sXrPCL_%g_VAR1_%g_VAR2_%g.txt", TYPECELLSTRING, minpcl, minvar1,minvar2);
+    snprintf(fileSpec2, 100, "%sXrPCL_%g_VAR1_%g_VAR2_%g_VAR3_%g_VAR4_%g.txt", TYPECELLSTRING, pcl, var1, var2, var3, var4);
     xrbifs = fopen(fileSpec2, "w");
 #endif
     
 #ifdef TT
     FILE *caibifs;
     char fileSpec2[100];
-    snprintf(fileSpec2, 100, "%scaiPCL_%g_VAR1_%g_VAR2_%g.txt", TYPECELLSTRING, minpcl, minvar1,minvar2);
+    snprintf(fileSpec2, 100, "%scaiPCL_%g_VAR1_%g_VAR2_%g_VAR3_%g_VAR4_%g.txt", TYPECELLSTRING, pcl, var1, var2, var3, var4);
     caibifs = fopen(fileSpec2, "w");
     
     FILE *casrbifs;
     char fileSpec3[100];
-    snprintf(fileSpec3, 100, "%scasrPCL_%g_VAR1_%g_VAR2_%g.txt", TYPECELLSTRING, minpcl, minvar1,minvar2);
+    snprintf(fileSpec3, 100, "%scasrPCL_%g_VAR1_%g_VAR2_%g_VAR3_%g_VAR4_%g.txt", TYPECELLSTRING, pcl, var1, var2, var3, var4);
     casrbifs = fopen(fileSpec3, "w");
     
     FILE *kibifs;
     char fileSpec4[100];
-    snprintf(fileSpec4, 100, "%skiPCL_%g_VAR1_%g_VAR2_%g.txt", TYPECELLSTRING, minpcl, minvar1,minvar2);
+    snprintf(fileSpec4, 100, "%skiPCL_%g_VAR1_%g_VAR2_%g_VAR3_%g_VAR4_%g.txt", TYPECELLSTRING, pcl, var1, var2, var3, var4);
     kibifs = fopen(fileSpec4, "w");
     
     FILE *naibifs;
     char fileSpec5[100];
-    snprintf(fileSpec5, 100, "%snaiPCL_%g_VAR1_%g_VAR2_%g.txt", TYPECELLSTRING, minpcl, minvar1,minvar2);
+    snprintf(fileSpec5, 100, "%snaiPCL_%g_VAR1_%g_VAR2_%g_VAR3_%g_VAR4_%g.txt", TYPECELLSTRING, pcl, var1, var2, var3, var4);
     naibifs = fopen(fileSpec5, "w");
+    
+    FILE *cpeakbifs;
+    char fileSpec6[100];
+    snprintf(fileSpec6, 100, "%scpeakPCL_%g_VAR1_%g_VAR2_%g_VAR3_%g_VAR4_%g.txt", TYPECELLSTRING, pcl, var1, var2, var3, var4);
+    cpeakbifs = fopen(fileSpec6, "w");
 #endif
     
 #ifdef UCLA
     FILE *caibifs;
     char fileSpec2[100];
-    snprintf(fileSpec2, 100, "%scaiPCL_%g_VAR1_%g_VAR2_%g.txt", TYPECELLSTRING, minpcl, minvar1,minvar2);
+    snprintf(fileSpec2, 100, "%scaiPCL_%g_VAR1_%g_VAR2_%g_VAR3_%g_VAR4_%g.txt", TYPECELLSTRING, pcl, var1, var2, var3, var4);
     caibifs = fopen(fileSpec2, "w");
     
     FILE *cassbifs;
     char fileSpec3[100];
-    snprintf(fileSpec3, 100, "%scassPCL_%g_VAR1_%g_VAR2_%g.txt", TYPECELLSTRING, minpcl, minvar1,minvar2);
+    snprintf(fileSpec3, 100, "%scassPCL_%g_VAR1_%g_VAR2_%g_VAR3_%g_VAR4_%g.txt", TYPECELLSTRING, pcl, var1, var2, var3, var4);
     cassbifs = fopen(fileSpec3, "w");
     
     FILE *naibifs;
     char fileSpec5[100];
-    snprintf(fileSpec5, 100, "%snaiPCL_%g_VAR1_%g_VAR2_%g.txt", TYPECELLSTRING, minpcl, minvar1,minvar2);
+    snprintf(fileSpec5, 100, "%snaiPCL_%g_VAR1_%g_VAR2_%g_VAR3_%g_VAR4_%g.txt", TYPECELLSTRING, pcl, var1, var2, var3, var4);
     naibifs = fopen(fileSpec5, "w");
 #endif  
 
 #ifdef OHara
     FILE *caibifs;
     char fileSpec2[100];
-    snprintf(fileSpec2, 100, "%scaiPCL_%g_VAR1_%g_VAR2_%g.txt", TYPECELLSTRING, minpcl, minvar1,minvar2);
+    snprintf(fileSpec2, 100, "%scaiPCL_%g_VAR1_%g_VAR2_%g_VAR3_%g_VAR4_%g.txt", TYPECELLSTRING, pcl, var1, var2, var3, var4);
     caibifs = fopen(fileSpec2, "w");
     
     FILE *cassbifs;
     char fileSpec3[100];
-    snprintf(fileSpec3, 100, "%scassPCL_%g_VAR1_%g_VAR2_%g.txt", TYPECELLSTRING, minpcl, minvar1,minvar2);
+    snprintf(fileSpec3, 100, "%scassPCL_%g_VAR1_%g_VAR2_%g_VAR3_%g_VAR4_%g.txt", TYPECELLSTRING, pcl, var1, var2, var3, var4);
     cassbifs = fopen(fileSpec3, "w");
     
     FILE *naibifs;
     char fileSpec5[100];
-    snprintf(fileSpec5, 100, "%snaiPCL_%g_VAR1_%g_VAR2_%g.txt", TYPECELLSTRING, minpcl, minvar1,minvar2);
+    snprintf(fileSpec5, 100, "%snaiPCL_%g_VAR1_%g_VAR2_%g_VAR3_%g_VAR4_%g.txt", TYPECELLSTRING, pcl, var1, var2, var3, var4);
     naibifs = fopen(fileSpec5, "w");
 #endif  
     
 #ifdef LR2
     FILE *caibifs;
     char fileSpec2[100];
-    snprintf(fileSpec2, 100, "%scaiPCL_%g_VAR1_%g_VAR2_%g.txt", TYPECELLSTRING, minpcl, minvar1,minvar2);
+    snprintf(fileSpec2, 100, "%scaiPCL_%g_VAR1_%g_VAR2_%g_VAR3_%g_VAR4_%g.txt", TYPECELLSTRING, pcl, var1, var2, var3, var4);
     caibifs = fopen(fileSpec2, "w");
     
     FILE *kibifs;
     char fileSpec4[100];
-    snprintf(fileSpec4, 100, "%skiPCL_%g_VAR1_%g_VAR2_%g.txt", TYPECELLSTRING, minpcl, minvar1,minvar2);
+    snprintf(fileSpec4, 100, "%skiPCL_%g_VAR1_%g_VAR2_%g_VAR3_%g_VAR4_%g.txt", TYPECELLSTRING, pcl, var1, var2, var3, var4);
     kibifs = fopen(fileSpec4, "w");
     
     FILE *naibifs;
     char fileSpec5[100];
-    snprintf(fileSpec5, 100, "%snaiPCL_%g_VAR1_%g_VAR2_%g.txt", TYPECELLSTRING, minpcl, minvar1,minvar2);
+    snprintf(fileSpec5, 100, "%snaiPCL_%g_VAR1_%g_VAR2_%g_VAR3_%g_VAR4_%g.txt", TYPECELLSTRING, pcl, var1, var2, var3, var4);
     naibifs = fopen(fileSpec5, "w");
 #endif
     
 #ifdef TTMod
     FILE *caibifs;
     char fileSpec2[100];
-    snprintf(fileSpec2, 100, "%scaiPCL_%g_VAR1_%g_VAR2_%g.txt", TYPECELLSTRING, minpcl, minvar1,minvar2);
+    snprintf(fileSpec2, 100, "%scaiPCL_%g_VAR1_%g_VAR2_%g_VAR3_%g_VAR4_%g.txt", TYPECELLSTRING, pcl, var1, var2, var3, var4);
     caibifs = fopen(fileSpec2, "w");
     
     FILE *casrbifs;
     char fileSpec3[100];
-    snprintf(fileSpec3, 100, "%scasrPCL_%g_VAR1_%g_VAR2_%g.txt", TYPECELLSTRING, minpcl, minvar1,minvar2);
+    snprintf(fileSpec3, 100, "%scasrPCL_%g_VAR1_%g_VAR2_%g_VAR3_%g_VAR4_%g.txt", TYPECELLSTRING, pcl, var1, var2, var3, var4);
     casrbifs = fopen(fileSpec3, "w");
     
     FILE *kibifs;
     char fileSpec4[100];
-    snprintf(fileSpec4, 100, "%skiPCL_%g_VAR1_%g_VAR2_%g.txt", TYPECELLSTRING, minpcl, minvar1,minvar2);
+    snprintf(fileSpec4, 100, "%skiPCL_%g_VAR1_%g_VAR2_%g_VAR3_%g_VAR4_%g.txt", TYPECELLSTRING, pcl, var1, var2, var3, var4);
     kibifs = fopen(fileSpec4, "w");
     
     FILE *naibifs;
     char fileSpec5[100];
-    snprintf(fileSpec5, 100, "%snaiPCL_%g_VAR1_%g_VAR2_%g.txt", TYPECELLSTRING, minpcl, minvar1,minvar2);
+    snprintf(fileSpec5, 100, "%snaiPCL_%g_VAR1_%g_VAR2_%g_VAR3_%g_VAR4_%g.txt", TYPECELLSTRING, pcl, var1, var2, var3, var4);
     naibifs = fopen(fileSpec5, "w");
 #endif
-    int index;
-    for (int i = 0; i < numpcl; i++) {
-        for (int j = 0; j < numvar1; j++) {
-            for (int k = 0; k < numvar2; k++) {
-                index = (numvar1*numvar2*i) + (numvar2*j) + k; //numvar*i + j
+    int index = 0;
+    //for (int i = 0; i < numpcl; i++) {
+ //       for (int j = 0; j < numvar1; j++) {
+   //         for (int k = 0; k < numvar2; k++) {
+    //            index = (numvar1*numvar2*i) + (numvar2*j) + k; //numvar*i + j
 		    #ifdef LR1
                 h_cells->Cells.itofac[index] = _itofac;
                 h_cells->Cells.icalfac[index] = _icalfac;
@@ -370,8 +378,8 @@ int main(int argc, char *argv[])
             #ifdef TT
                 h_cells->Cells.itofac[index] = _itofac;
                 h_cells->Cells.iskfac[index] = _iskfac;
-                h_cells->Cells.nai[index] = _nai;
-                h_cells->Cells.ki[index] = _ki;
+                //h_cells->Cells.nai[index] = _nai;
+                //h_cells->Cells.ki[index] = _ki;
 		h_cells->Cells.nacafac[index] = _nacafac;
 
                 h_cells->Cells.ikrfac[index] = _ikrfac;
@@ -411,19 +419,21 @@ int main(int argc, char *argv[])
 #ifdef TTMod
                 h_cells->Cells.ibarcafac[index] = 1.0;
 #endif
-                h_cells->Cells.VARIABLE1[index] = byvar1*j + minvar1;
-                h_cells->Cells.VARIABLE2[index] = byvar2*k + minvar2;
+                h_cells->Cells.VARIABLE1[index] = var1;
+                h_cells->Cells.VARIABLE2[index] = var2;
+                h_cells->Cells.VARIABLE3[index] = var3;
+                h_cells->Cells.VARIABLE4[index] = var4;
 #ifdef TT
 		printf("%d\t%g\n",index,h_cells->Cells.vcfac[index]);
 #endif
-		h_cells->pcls[index] = bypcl*i + minpcl;
+		h_cells->pcls[index] = pcl;
 #ifdef OHara
 		h_cells->Cells.nass[index] = h_cells->Cells.nai[index];
 		h_cells->Cells.kss[index] = h_cells->Cells.ki[index];
 #endif
-            }
-        }
-    }
+        //    }
+       // }
+   // }
     
     printf("Byte Size of Cells on Device: %lu\n", sizeof(APDBifurcation<TYPECELL, NCELLS, BEATS>) );
     //Now run the program
@@ -431,11 +441,11 @@ int main(int argc, char *argv[])
     long double t = -stimt;
     h_cells->dobif(dt, t);
     
-    for (int i = 0; i < numpcl; i++) {
-        for (int j = 0; j < numvar1; j++) {
-            for (int k = 0; k < numvar2; k++) {
-                index = (numvar1*numvar2*i) + (numvar2*j) + k;
-                fprintf(allbifs, "%g\t%g\t%g", bypcl*i + minpcl, byvar1*j + minvar1, byvar2*k + minvar2);
+  //  for (int i = 0; i < numpcl; i++) {
+  //      for (int j = 0; j < numvar1; j++) {
+  //          for (int k = 0; k < numvar2; k++) {
+                index = 0;
+                fprintf(allbifs, "%g\t%g\t%g\t%g\t%g", pcl, var1, var2, var3, var4);
                 for (int l = REMOVEBEATS; l < BEATS; l++) {
                     fprintf(allbifs, "\t%g", h_cells->apds[BEATS*(index) + l]);
                 }
@@ -443,8 +453,8 @@ int main(int argc, char *argv[])
             
             
 #ifdef LR1
-                fprintf(xrbifs, "%g\t%g\t%g", bypcl*i + minpcl, byvar1*j + minvar1, byvar2*k + minvar2);
-                fprintf(ytosbifs, "%g\t%g\t%g", bypcl*i + minpcl, byvar1*j + minvar1, byvar2*k + minvar2);
+                fprintf(xrbifs, "%g\t%g\t%g\t%g\t%g", pcl, var1, var2, var3, var4);
+                fprintf(ytosbifs, "%g\t%g\t%g\t%g\t%g", pcl, var1, var2, var3, var4);
                 for (int l = 2*REMOVEBEATS; l < 2*BEATS; l++) {
                     fprintf(xrbifs, "\t%g", h_cells->xrs[2*BEATS*(index) + l]);
                 fprintf(ytosbifs, "\t%g", h_cells->ytoss[2*BEATS*(index) + l]);
@@ -454,17 +464,18 @@ int main(int argc, char *argv[])
 #endif
             
 #ifdef LR1_taud
-                fprintf(xrbifs, "%g\t%g\t%g", bypcl*i + minpcl, byvar1*j + minvar1, byvar2*k + minvar2);
+                fprintf(xrbifs, "%g\t%g\t%g\t%g\t%g", pcl, var1, var2, var3, var4);
                 for (int l = 2*REMOVEBEATS; l < 2*BEATS; l++) {
                     fprintf(xrbifs, "\t%g", h_cells->xrs[2*BEATS*(index) + l]);
                 }
                 fprintf(xrbifs, "\n");
 #endif
 #ifdef TT
-                fprintf(caibifs, "%g\t%g\t%g", bypcl*i + minpcl, byvar1*j + minvar1, byvar2*k + minvar2);
-                fprintf(casrbifs, "%g\t%g\t%g", bypcl*i + minpcl, byvar1*j + minvar1, byvar2*k + minvar2);
-                fprintf(kibifs, "%g\t%g\t%g", bypcl*i + minpcl, byvar1*j + minvar1, byvar2*k + minvar2);
-                fprintf(naibifs, "%g\t%g\t%g", bypcl*i + minpcl, byvar1*j + minvar1, byvar2*k + minvar2);
+                fprintf(caibifs, "%g\t%g\t%g\t%g\t%g", pcl, var1, var2, var3, var4);
+                fprintf(casrbifs, "%g\t%g\t%g\t%g\t%g", pcl, var1, var2, var3, var4);
+                fprintf(kibifs, "%g\t%g\t%g\t%g\t%g", pcl, var1, var2, var3, var4);
+                fprintf(naibifs, "%g\t%g\t%g\t%g\t%g", pcl, var1, var2, var3, var4);
+                fprintf(cpeakbifs, "%g\t%g\t%g\t%g\t%g", pcl, var1, var2, var3, var4);
             
                 for (int l = 2*REMOVEBEATS; l < 2*BEATS; l++) {
                     fprintf(caibifs, "\t%g", h_cells->cais[2*BEATS*(index) + l]);
@@ -472,16 +483,20 @@ int main(int argc, char *argv[])
                     fprintf(kibifs, "\t%g", h_cells->kis[2*BEATS*(index) + l]);
                     fprintf(naibifs, "\t%g", h_cells->nais[2*BEATS*(index) + l]);
                 }
+                for (int l = REMOVEBEATS; l < BEATS; l++) {
+                    fprintf(cpeakbifs, "\t%g", h_cells->cpeaks[BEATS*(index) + l]);
+                }
                 fprintf(caibifs, "\n");
                 fprintf(casrbifs, "\n");
                 fprintf(kibifs, "\n");
                 fprintf(naibifs, "\n");
+                fprintf(cpeakbifs, "\n");
 #endif
                 
 #ifdef UCLA
-                fprintf(caibifs, "%g\t%g\t%g", bypcl*i + minpcl, byvar1*j + minvar1, byvar2*k + minvar2);
-                fprintf(naibifs, "%g\t%g\t%g", bypcl*i + minpcl, byvar1*j + minvar1, byvar2*k + minvar2);
-                fprintf(cassbifs, "%g\t%g\t%g", bypcl*i + minpcl, byvar1*j + minvar1, byvar2*k + minvar2);
+                fprintf(caibifs, "%g\t%g\t%g\t%g\t%g", pcl, var1, var2, var3, var4);
+                fprintf(naibifs, "%g\t%g\t%g\t%g\t%g", pcl, var1, var2, var3, var4);
+                fprintf(cassbifs, "%g\t%g\t%g\t%g\t%g", pcl, var1, var2, var3, var4);
                 for (int l = 2*REMOVEBEATS; l < 2*BEATS; l++) {
                     fprintf(caibifs, "\t%g", h_cells->cais[2*BEATS*(index) + l]);
                     fprintf(naibifs, "\t%g", h_cells->nais[2*BEATS*(index) + l]);
@@ -493,9 +508,9 @@ int main(int argc, char *argv[])
 #endif
 
 #ifdef OHara
-                fprintf(caibifs, "%g\t%g\t%g", bypcl*i + minpcl, byvar1*j + minvar1, byvar2*k + minvar2);
-                fprintf(naibifs, "%g\t%g\t%g", bypcl*i + minpcl, byvar1*j + minvar1, byvar2*k + minvar2);
-                fprintf(cassbifs, "%g\t%g\t%g", bypcl*i + minpcl, byvar1*j + minvar1, byvar2*k + minvar2);
+                fprintf(caibifs, "%g\t%g\t%g\t%g\t%g", pcl, var1, var2, var3, var4);
+                fprintf(naibifs, "%g\t%g\t%g\t%g\t%g", pcl, var1, var2, var3, var4);
+                fprintf(cassbifs, "%g\t%g\t%g\t%g\t%g", pcl, var1, var2, var3, var4);
                 for (int l = 2*REMOVEBEATS; l < 2*BEATS; l++) {
                     fprintf(caibifs, "\t%g", h_cells->cais[2*BEATS*(index) + l]);
                     fprintf(naibifs, "\t%g", h_cells->nais[2*BEATS*(index) + l]);
@@ -507,9 +522,9 @@ int main(int argc, char *argv[])
 #endif                 
                 
 #ifdef LR2
-                fprintf(caibifs, "%g\t%g\t%g", bypcl*i + minpcl, byvar1*j + minvar1, byvar2*k + minvar2);
-                fprintf(kibifs, "%g\t%g\t%g", bypcl*i + minpcl, byvar1*j + minvar1, byvar2*k + minvar2);
-                fprintf(naibifs, "%g\t%g\t%g", bypcl*i + minpcl, byvar1*j + minvar1, byvar2*k + minvar2);
+                fprintf(caibifs, "%g\t%g\t%g\t%g\t%g", pcl, var1, var2, var3, var4);
+                fprintf(kibifs, "%g\t%g\t%g\t%g\t%g", pcl, var1, var2, var3, var4);
+                fprintf(naibifs, "%g\t%g\t%g\t%g\t%g", pcl, var1, var2, var3, var4);
             
                 for (int l = 2*REMOVEBEATS; l < 2*BEATS; l++) {
                     fprintf(caibifs, "\t%g", h_cells->cais[2*BEATS*(index) + l]);
@@ -521,10 +536,10 @@ int main(int argc, char *argv[])
                 fprintf(naibifs, "\n");
 #endif            
 #ifdef TTMod
-                fprintf(caibifs, "%g\t%g\t%g", byvar1*j + minvar1, byvar2*k + minvar2);
-                fprintf(casrbifs, "%g\t%g\t%g", byvar1*j + minvar1, byvar2*k + minvar2);
-                fprintf(kibifs, "%g\t%g\t%g", byvar1*j + minvar1, byvar2*k + minvar2);
-                fprintf(naibifs, "%g\t%g\t%g", byvar1*j + minvar1, byvar2*k + minvar2);
+                fprintf(caibifs, "%g\t%g\t%g\t%g\t%g", pcl, var1, var2, var3, var4);
+                fprintf(casrbifs, "%g\t%g\t%g\t%g\t%g", pcl, var1, var2, var3, var4);
+                fprintf(kibifs, "%g\t%g\t%g\t%g\t%g", pcl, var1, var2, var3, var4);
+                fprintf(naibifs, "%g\t%g\t%g\t%g\t%g", pcl, var1, var2, var3, var4);
             
                 for (int l = 2*REMOVEBEATS; l < 2*BEATS; l++) {
                     fprintf(caibifs, "\t%g", h_cells->cais[2*BEATS*(index) + l]);
@@ -537,9 +552,9 @@ int main(int argc, char *argv[])
                 fprintf(kibifs, "\n");
                 fprintf(naibifs, "\n");
 #endif
-            }
-        }
-    }
+ //           }
+ //       }
+ //   }
 
     delete h_cells;
     fclose(allbifs);
@@ -555,6 +570,7 @@ int main(int argc, char *argv[])
     fclose(casrbifs);
     fclose(kibifs);
     fclose(naibifs);
+    fclose(cpeakbifs);
 #endif
 #ifdef UCLA
     fclose(caibifs);

@@ -12,19 +12,66 @@ Output = job_$(Process).out
 Error = job_$(Process).error
 stream_output = True
 
-Initialdir = /home/jlandaw/IonicModelCPU/Bifurcations/APDBifurcation
+Initialdir = /home/jlandaw/IonicModelCPU/Bifurcations/APDBifurcation 
 
-N = 1001
-ical = 0.8
-naca = 5
-pcl = 1500 + 5*$(Process)
-Arguments = $REAL(ical) $REAL(ical) $REAL(naca) $REAL(naca) $INT(pcl) $INT(pcl) 0.05
+N = 201*56
+O = ($(Process)/56)
+P = ($(Process)%56)
+ito = 5 + 0.025*$(O)
+ical = 1
+iup = 1
+pcl=50+10*$(P)
 
-#N = 51
-#ito = 0.9
-#naca = 0.1*$(Process)
-#pcl = 1200
-
-#Arguments = $REAL(ito) $REAL(ito) $REAL(naca) $REAL(naca) $INT(pcl) $INT(pcl) 0.05
+Arguments = $REAL(ito) $REAL(ical) $REAL(iup) $REAL(ical) $REAL(pcl) 0.05
 
 Queue $(N)
+
+#N = 1001
+#isk1 = 0.01*$(Process) 
+#isk2 = $(isk1)
+#skh1 = 1
+#skh2 = $(skh1)
+#pcl1 = 200
+#pcl2 = $(pcl1)
+
+#Arguments = $REAL(isk1) $REAL(isk2) $REAL(skh1) $REAL(skh2) $REAL(pcl1) $REAL(pcl2) 0.05
+
+#Queue $(N)
+
+#N = 101*101
+#O = ($(Process) / 101)
+#P = ($(Process) % 101)
+#ito1 = 0.05*$(O)
+#ito2 = $(ito1)
+#ical1 = 0.05*$(P)
+#ical2 = $(ical1)
+
+#pcl1 = 500
+#pcl2 = $(pcl1)
+
+#Arguments = $REAL(ito1) $REAL(ito2) $REAL(ical1) $REAL(ical2) $INT(pcl1) $INT(pcl2) 0.05
+
+#Queue $(N)
+
+#N = 101*101
+#O = ($(Process) % 101)
+#P = ($(Process) / 101)
+
+#pcl1 = 500
+#pcl2 = $(pcl1)
+
+#ito1 = 0.1*$(O)
+#ito2 = $(ito1)
+
+#isk1 = 2*$(O)
+#isk1 = 45
+#isk1 = 0.1*$(Process)
+#isk2 = $(isk1)
+#skh1 = 0.0001 + 0.0001*$(P)
+#skh1 = 0.00001 + 0.00001*$(Process)
+#skh1 = 0.0025
+#skh2 = $(skh1)
+
+#Arguments = $REAL(isk1) $REAL(isk2) $REAL(skh1) $REAL(skh2) $INT(pcl1) $INT(pcl2) 0.05
+
+#Queue $(N)

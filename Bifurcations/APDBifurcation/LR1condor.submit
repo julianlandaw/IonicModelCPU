@@ -1,7 +1,7 @@
 Universe   = vanilla
 Executable = LR1bif.out
 
-Request_Memory = 1024
+Request_Memory = 128
 
 #Request_GPUs = 1
 #Requirements = CUDACapability >= 3.0
@@ -14,18 +14,64 @@ stream_output = True
 
 Initialdir = /home/jlandaw/IonicModelCPU/Bifurcations/APDBifurcation 
 
-N = 300*21
-O = ($(Process) / 300)
-P = ($(Process) % 300)
+N = 201*56
+O = ($(Process)/56)
+P = ($(Process)%56)
+ito = 2 + 0.01*$(O)
+ical = 1
+iup = 1
+pcl=50+10*$(P)
 
-pcl1 = 5+5*$(P)
-pcl2 = $(pcl1)
+Arguments = $REAL(ito) $REAL(ical) $REAL(iup) $REAL(ical) $REAL(pcl) 0.05
 
-itos1 = 5
-itos2 = $(itos1)
-
-taux1 = $(O)
-taux2 = $(taux1)
-
-Arguments = $REAL(itos1) $REAL(itos2) $REAL(taux1) $REAL(taux2) $INT(pcl1) $INT(pcl2) 0.05
 Queue $(N)
+
+#N = 1001
+#isk1 = 0.01*$(Process) 
+#isk2 = $(isk1)
+#skh1 = 1
+#skh2 = $(skh1)
+#pcl1 = 200
+#pcl2 = $(pcl1)
+
+#Arguments = $REAL(isk1) $REAL(isk2) $REAL(skh1) $REAL(skh2) $REAL(pcl1) $REAL(pcl2) 0.05
+
+#Queue $(N)
+
+#N = 101*101
+#O = ($(Process) / 101)
+#P = ($(Process) % 101)
+#ito1 = 0.05*$(O)
+#ito2 = $(ito1)
+#ical1 = 0.05*$(P)
+#ical2 = $(ical1)
+
+#pcl1 = 500
+#pcl2 = $(pcl1)
+
+#Arguments = $REAL(ito1) $REAL(ito2) $REAL(ical1) $REAL(ical2) $INT(pcl1) $INT(pcl2) 0.05
+
+#Queue $(N)
+
+#N = 101*101
+#O = ($(Process) % 101)
+#P = ($(Process) / 101)
+
+#pcl1 = 500
+#pcl2 = $(pcl1)
+
+#ito1 = 0.1*$(O)
+#ito2 = $(ito1)
+
+#isk1 = 2*$(O)
+#isk1 = 45
+#isk1 = 0.1*$(Process)
+#isk2 = $(isk1)
+#skh1 = 0.0001 + 0.0001*$(P)
+#skh1 = 0.00001 + 0.00001*$(Process)
+#skh1 = 0.0025
+#skh2 = $(skh1)
+
+#Arguments = $REAL(isk1) $REAL(isk2) $REAL(skh1) $REAL(skh2) $INT(pcl1) $INT(pcl2) 0.05
+
+#Queue $(N)

@@ -65,6 +65,7 @@ public:
     double itoslowfac[ncells];
     double ikrfac[ncells];
     double iksfac[ncells];
+    double ik1fac[ncells];
     double inafac[ncells];
     double nacafac[ncells];
     double icalfac[ncells];

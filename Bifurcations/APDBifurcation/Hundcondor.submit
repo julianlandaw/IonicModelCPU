@@ -1,5 +1,5 @@
 Universe   = vanilla
-Executable = LR2bif.out
+Executable = Hundbif.out
 
 Request_Memory = 128
 
@@ -14,15 +14,15 @@ stream_output = True
 
 Initialdir = /home/jlandaw/IonicModelCPU/Bifurcations/APDBifurcation 
 
-N = 5001
-#O = ($(Process)/56)
-#P = ($(Process)%56)
-ito = 0.001*$(Process)
+N = 201*56
+O = ($(Process)/56)
+P = ($(Process)%56)
+ito = 10 + 0.025*$(O)
 ical = 1
 iup = 1
-pcl=500
+pcl=50+10*$(P)
 
-Arguments = $REAL(ito) $REAL(ito) $REAL(ito) $REAL(ito) $REAL(pcl) 0.05
+Arguments = $REAL(ito) $REAL(ical) $REAL(iup) $REAL(ical) $REAL(pcl) 0.05
 
 Queue $(N)
 

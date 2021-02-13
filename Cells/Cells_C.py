@@ -553,35 +553,11 @@ class TTCellIto(object):
         lib.TT_getcai.argtypes = [ctypes.c_void_p,ctypes.c_int]
         lib.TT_getcai.restype = ctypes.c_double
         
-        lib.TT_getnai.argtypes = [ctypes.c_void_p,ctypes.c_int]
-        lib.TT_getnai.restype = ctypes.c_double
-        
-        lib.TT_getki.argtypes = [ctypes.c_void_p,ctypes.c_int]
-        lib.TT_getki.restype = ctypes.c_double
-        
         lib.TT_setv.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_double]
         lib.TT_setv.restype = ctypes.c_void_p
         
-        lib.TT_setcai.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_double]
-        lib.TT_setcai.restype = ctypes.c_void_p
-        
-        lib.TT_setnai.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_double]
-        lib.TT_setnai.restype = ctypes.c_void_p
-        
         lib.TT_setito.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_double]
         lib.TT_setito.restype = ctypes.c_void_p
-        
-        lib.TT_clampnai.argtypes = [ctypes.c_void_p, ctypes.c_int]
-        lib.TT_clampnai.restype = ctypes.c_void_p
-        
-        lib.TT_clampki.argtypes = [ctypes.c_void_p, ctypes.c_int]
-        lib.TT_clampki.restype = ctypes.c_void_p
-        
-        lib.TT_unclampnai.argtypes = [ctypes.c_void_p, ctypes.c_int]
-        lib.TT_unclampnai.restype = ctypes.c_void_p
-        
-        lib.TT_unclampki.argtypes = [ctypes.c_void_p, ctypes.c_int]
-        lib.TT_unclampki.restype = ctypes.c_void_p
         
         lib.TTCellIto_newsing.argtypes = None
         lib.TTCellIto_newsing.restype = ctypes.c_void_p
@@ -595,35 +571,11 @@ class TTCellIto(object):
         lib.TT_getcaising.argtypes = [ctypes.c_void_p]
         lib.TT_getcaising.restype = ctypes.c_double
         
-        lib.TT_getnaising.argtypes = [ctypes.c_void_p]
-        lib.TT_getnaising.restype = ctypes.c_double
-        
-        lib.TT_getkising.argtypes = [ctypes.c_void_p]
-        lib.TT_getkising.restype = ctypes.c_double
-        
         lib.TT_setvsing.argtypes = [ctypes.c_void_p, ctypes.c_double]
         lib.TT_setvsing.restype = ctypes.c_void_p
         
-        lib.TT_setcaising.argtypes = [ctypes.c_void_p, ctypes.c_double]
-        lib.TT_setcaising.restype = ctypes.c_void_p
-        
-        lib.TT_setnaising.argtypes = [ctypes.c_void_p, ctypes.c_double]
-        lib.TT_setnaising.restype = ctypes.c_void_p
-        
         lib.TT_setitosing.argtypes = [ctypes.c_void_p, ctypes.c_double]
         lib.TT_setitosing.restype = ctypes.c_void_p
-        
-        lib.TT_clampnaising.argtypes = [ctypes.c_void_p]
-        lib.TT_clampnaising.restype = ctypes.c_void_p
-        
-        lib.TT_clampkising.argtypes = [ctypes.c_void_p]
-        lib.TT_clampkising.restype = ctypes.c_void_p
-        
-        lib.TT_unclampnaising.argtypes = [ctypes.c_void_p]
-        lib.TT_unclampnaising.restype = ctypes.c_void_p
-        
-        lib.TT_unclampkising.argtypes = [ctypes.c_void_p]
-        lib.TT_unclampkising.restype = ctypes.c_void_p
         
         lib.TT_copycell.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p]
         lib.TT_copycell.restype = ctypes.c_void_p
@@ -660,66 +612,18 @@ class TTCellIto(object):
         else:
             return lib.TT_getcaising(self.obj)    
     
-    def getnai(self,ind=0):
-        if (self.onecell is False):
-            return lib.TT_getnai(self.obj,ctypes.c_int(ind))
-        else:
-            return lib.TT_getnaising(self.obj)
-    
-    def getki(self,ind=0):
-        if (self.onecell is False):
-            return lib.TT_getki(self.obj,ctypes.c_int(ind))
-        else:
-            return lib.TT_getkising(self.obj)
-    
     def setv(self,v,ind=0):
         if (self.onecell is False):
             lib.TT_setv(self.obj,ctypes.c_int(ind),ctypes.c_double(v))
         else:
             lib.TT_setvsing(self.obj,ctypes.c_double(v))
-            
-    def setcai(self,v,ind=0):
-        if (self.onecell is False):
-            lib.TT_setcai(self.obj,ctypes.c_int(ind),ctypes.c_double(v))
-        else:
-            lib.TT_setcaising(self.obj,ctypes.c_double(v))
-            
-    def setnai(self,v,ind=0):
-        if (self.onecell is False):
-            lib.TT_setnai(self.obj,ctypes.c_int(ind),ctypes.c_double(v))
-        else:
-            lib.TT_setnaising(self.obj,ctypes.c_double(v))        
         
     def setito(self,itofac,ind=0):
         if (self.onecell is False):
             lib.TT_setito(self.obj,ctypes.c_int(ind),ctypes.c_double(itofac))
         else:
             lib.TT_setitosing(self.obj,ctypes.c_double(itofac))
-    
-    def clampnai(self,ind=0):
-        if (self.onecell is False):
-            lib.TT_clampnai(self.obj,ctypes.c_int(ind))
-        else:
-            lib.TT_clampnaising(self.obj)
-    
-    def clampki(self,ind=0):
-        if (self.onecell is False):
-            lib.TT_clampki(self.obj,ctypes.c_int(ind))
-        else:
-            lib.TT_clampkising(self.obj)
-            
-    def unclampnai(self,ind=0):
-        if (self.onecell is False):
-            lib.TT_unclampnai(self.obj,ctypes.c_int(ind))
-        else:
-            lib.TT_unclampnaising(self.obj)
-    
-    def unclampki(self,ind=0):
-        if (self.onecell is False):
-            lib.TT_unclampki(self.obj,ctypes.c_int(ind))
-        else:
-            lib.TT_unclampkising(self.obj)
-    
+        
     def copycell(self,newcell,ind=0):
         if (self.onecell is False):
             lib.TT_copycell(self.obj,ctypes.c_int(ind),newcell.obj)    
@@ -733,208 +637,7 @@ class TTCellIto(object):
     def diffuseall(self, D):
         if (self.onecell is False):
             lib.TT_diffuse1Dall(self.obj, ctypes.c_double(D))        
-
-class TP06Cell(object):
-    stimduration = 1.0
-    stim = -52.0
-    onecell = True
-    typecell = 4
-    def __init__(self, onecell = True):
-        self.onecell = onecell
-        
-        lib.TP06Cell_new.argtypes = None
-        lib.TP06Cell_new.restype = ctypes.c_void_p
-
-        lib.TP06_stepdt.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_double, ctypes.c_double]
-        lib.TP06_stepdt.restype = ctypes.c_void_p
-        
-        lib.TP06_getv.argtypes = [ctypes.c_void_p,ctypes.c_int]
-        lib.TP06_getv.restype = ctypes.c_double
-        
-        lib.TP06_getcai.argtypes = [ctypes.c_void_p,ctypes.c_int]
-        lib.TP06_getcai.restype = ctypes.c_double
-        
-        lib.TP06_getnai.argtypes = [ctypes.c_void_p,ctypes.c_int]
-        lib.TP06_getnai.restype = ctypes.c_double
-        
-        lib.TP06_getki.argtypes = [ctypes.c_void_p,ctypes.c_int]
-        lib.TP06_getki.restype = ctypes.c_double
-        
-        lib.TP06_setv.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_double]
-        lib.TP06_setv.restype = ctypes.c_void_p
-        
-        lib.TP06_setcai.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_double]
-        lib.TP06_setcai.restype = ctypes.c_void_p
-        
-        lib.TP06_setnai.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_double]
-        lib.TP06_setnai.restype = ctypes.c_void_p
-        
-        lib.TP06_setito.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_double]
-        lib.TP06_setito.restype = ctypes.c_void_p
-        
-        lib.TP06_clampnai.argtypes = [ctypes.c_void_p, ctypes.c_int]
-        lib.TP06_clampnai.restype = ctypes.c_void_p
-        
-        lib.TP06_clampki.argtypes = [ctypes.c_void_p, ctypes.c_int]
-        lib.TP06_clampki.restype = ctypes.c_void_p
-        
-        lib.TP06_unclampnai.argtypes = [ctypes.c_void_p, ctypes.c_int]
-        lib.TP06_unclampnai.restype = ctypes.c_void_p
-        
-        lib.TP06_unclampki.argtypes = [ctypes.c_void_p, ctypes.c_int]
-        lib.TP06_unclampki.restype = ctypes.c_void_p
-        
-        lib.TP06Cell_newsing.argtypes = None
-        lib.TP06Cell_newsing.restype = ctypes.c_void_p
-
-        lib.TP06_stepdtsing.argtypes = [ctypes.c_void_p, ctypes.c_double, ctypes.c_double]
-        lib.TP06_stepdtsing.restype = ctypes.c_void_p
-        
-        lib.TP06_getvsing.argtypes = [ctypes.c_void_p]
-        lib.TP06_getvsing.restype = ctypes.c_double
-        
-        lib.TP06_getcaising.argtypes = [ctypes.c_void_p]
-        lib.TP06_getcaising.restype = ctypes.c_double
-        
-        lib.TP06_getnaising.argtypes = [ctypes.c_void_p]
-        lib.TP06_getnaising.restype = ctypes.c_double
-        
-        lib.TP06_getkising.argtypes = [ctypes.c_void_p]
-        lib.TP06_getkising.restype = ctypes.c_double
-        
-        lib.TP06_setvsing.argtypes = [ctypes.c_void_p, ctypes.c_double]
-        lib.TP06_setvsing.restype = ctypes.c_void_p
-        
-        lib.TP06_setcaising.argtypes = [ctypes.c_void_p, ctypes.c_double]
-        lib.TP06_setcaising.restype = ctypes.c_void_p
-        
-        lib.TP06_setnaising.argtypes = [ctypes.c_void_p, ctypes.c_double]
-        lib.TP06_setnaising.restype = ctypes.c_void_p
-        
-        lib.TP06_setitosing.argtypes = [ctypes.c_void_p, ctypes.c_double]
-        lib.TP06_setitosing.restype = ctypes.c_void_p
-        
-        lib.TP06_clampnaising.argtypes = [ctypes.c_void_p]
-        lib.TP06_clampnaising.restype = ctypes.c_void_p
-        
-        lib.TP06_clampkising.argtypes = [ctypes.c_void_p]
-        lib.TP06_clampkising.restype = ctypes.c_void_p
-        
-        lib.TP06_unclampnaising.argtypes = [ctypes.c_void_p]
-        lib.TP06_unclampnaising.restype = ctypes.c_void_p
-        
-        lib.TP06_unclampkising.argtypes = [ctypes.c_void_p]
-        lib.TP06_unclampkising.restype = ctypes.c_void_p
-        
-        lib.TP06_copycell.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p]
-        lib.TP06_copycell.restype = ctypes.c_void_p
-        
-        lib.TP06_copycellsing.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
-        lib.TP06_copycellsing.restype = ctypes.c_void_p
-        
-        lib.TP06_diffuse1D.argtypes = [ctypes.c_void_p, ctypes.c_double, ctypes.c_int]
-        lib.TP06_diffuse1D.restype = ctypes.c_void_p
-        
-        lib.TP06_diffuse1Dall.argtypes = [ctypes.c_void_p, ctypes.c_double]
-        lib.TP06_diffuse1Dall.restype = ctypes.c_void_p
-        
-        if (onecell):
-            self.obj = lib.TP06Cell_newsing()
-        else:
-            self.obj = lib.TP06Cell_new()
             
-    def stepdt(self,dt,st,ind=0):
-        if (self.onecell is False):
-            lib.TP06_stepdt(self.obj,ctypes.c_int(ind),ctypes.c_double(dt),ctypes.c_double(st))
-        else:
-            lib.TP06_stepdtsing(self.obj,ctypes.c_double(dt),ctypes.c_double(st))
-        
-    def getv(self,ind=0):
-        if (self.onecell is False):
-            return lib.TP06_getv(self.obj,ctypes.c_int(ind))
-        else:
-            return lib.TP06_getvsing(self.obj)
-        
-    def getcai(self,ind=0):
-        if (self.onecell is False):
-            return lib.TP06_getcai(self.obj,ctypes.c_int(ind))
-        else:
-            return lib.TP06_getcaising(self.obj)    
-    
-    def getnai(self,ind=0):
-        if (self.onecell is False):
-            return lib.TP06_getnai(self.obj,ctypes.c_int(ind))
-        else:
-            return lib.TP06_getnaising(self.obj)
-    
-    def getki(self,ind=0):
-        if (self.onecell is False):
-            return lib.TP06_getki(self.obj,ctypes.c_int(ind))
-        else:
-            return lib.TP06_getkising(self.obj)
-    
-    def setv(self,v,ind=0):
-        if (self.onecell is False):
-            lib.TP06_setv(self.obj,ctypes.c_int(ind),ctypes.c_double(v))
-        else:
-            lib.TP06_setvsing(self.obj,ctypes.c_double(v))
-            
-    def setcai(self,v,ind=0):
-        if (self.onecell is False):
-            lib.TP06_setcai(self.obj,ctypes.c_int(ind),ctypes.c_double(v))
-        else:
-            lib.TP06_setcaising(self.obj,ctypes.c_double(v))
-            
-    def setnai(self,v,ind=0):
-        if (self.onecell is False):
-            lib.TP06_setnai(self.obj,ctypes.c_int(ind),ctypes.c_double(v))
-        else:
-            lib.TP06_setnaising(self.obj,ctypes.c_double(v))        
-        
-    def setito(self,itofac,ind=0):
-        if (self.onecell is False):
-            lib.TP06_setito(self.obj,ctypes.c_int(ind),ctypes.c_double(itofac))
-        else:
-            lib.TP06_setitosing(self.obj,ctypes.c_double(itofac))
-    
-    def clampnai(self,ind=0):
-        if (self.onecell is False):
-            lib.TP06_clampnai(self.obj,ctypes.c_int(ind))
-        else:
-            lib.TP06_clampnaising(self.obj)
-    
-    def clampki(self,ind=0):
-        if (self.onecell is False):
-            lib.TP06_clampki(self.obj,ctypes.c_int(ind))
-        else:
-            lib.TP06_clampkising(self.obj)
-            
-    def unclampnai(self,ind=0):
-        if (self.onecell is False):
-            lib.TP06_unclampnai(self.obj,ctypes.c_int(ind))
-        else:
-            lib.TP06_unclampnaising(self.obj)
-    
-    def unclampki(self,ind=0):
-        if (self.onecell is False):
-            lib.TP06_unclampki(self.obj,ctypes.c_int(ind))
-        else:
-            lib.TP06_unclampkising(self.obj)
-    
-    def copycell(self,newcell,ind=0):
-        if (self.onecell is False):
-            lib.TP06_copycell(self.obj,ctypes.c_int(ind),newcell.obj)    
-        else:
-            lib.TP06_copycellsing(self.obj,newcell.obj)
-            
-    def diffuse(self, D, ind):
-        if (self.onecell is False):
-            lib.TP06_diffuse1D(self.obj, ctypes.c_double(D), ctypes.c_int(ind))
-    
-    def diffuseall(self, D):
-        if (self.onecell is False):
-            lib.TP06_diffuse1Dall(self.obj, ctypes.c_double(D))             
-
 def pacecell(x,pcl=1000,beats=50,beatsave=10,dt=0.05):
     globalt = -1000
     tsave = -200
@@ -960,7 +663,6 @@ def pacecell(x,pcl=1000,beats=50,beatsave=10,dt=0.05):
     inapd = False
     apds = []
     startapd = 0
-    beatcounter = 0
     while (globalt < pcl*beats + 500):
         if (tstim > -dt/4 and tstim < x.stimduration - dt/4):
             if (inapd is False and x.getv() > -75):
@@ -978,8 +680,7 @@ def pacecell(x,pcl=1000,beats=50,beatsave=10,dt=0.05):
             else:    
                 if (inapd is False):
                     startapd = globalt
-                    beatcounter = beatcounter + 1
-                    print(beatcounter, globalt)
+                
                 inapd = True
                 x.stepdt(dt,x.stim)
                 globalt = globalt + dt

@@ -60,6 +60,9 @@ APDBifurcation<typecell, ncells, beats>::APDBifurcation() {
         cais[i] = 0;
         casrs[i] = 0;
     }
+    for (i = 0; i < ncells*beats; i++) {
+        cpeaks[i] = 0;
+    }
 #endif
 #ifdef UCLA
     for (i = 0; i < 2*ncells*beats; i++) {
@@ -114,6 +117,13 @@ void APDBifurcation<typecell, ncells, beats>::iterate(const int id, long double 
         Cells.nai[id] = 10.0;
 #endif
         PRECTYPE vnew = Cells.v[id];
+#ifdef TT
+        if (vnew >= threshold) {
+            if (Cells.cai[id] > cpeaks[beats*id + curbeat[id] + 1]) {
+                cpeaks[beats*id + curbeat[id] + 1] = Cells.cai[id];
+            }
+        }
+#endif
         if (vold < threshold && vnew >= threshold) {
             startapds[id] = t;
             

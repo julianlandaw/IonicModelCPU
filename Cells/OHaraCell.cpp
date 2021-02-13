@@ -82,6 +82,7 @@ OHaraCell<ncells>::OHaraCell()
         inafac[i] = 1.0;
         ikrfac[i] = 1.0;
         iksfac[i] = 1.0;
+	ik1fac[i] = 1.0;
         icalfac[i] = 1.0;
         nacafac[i] = 1.0;
         yshift[i] = 0.0;
@@ -622,7 +623,7 @@ double OHaraCell<ncells>::comp_ik1 (int id, double dt, double& dxk1)
         GK1*=1.3;
     }
     
-    IK1 = GK1*sqrt(ko)*rk1*xk1[id]*(v[id] - EK);
+    IK1 = ik1fac[id]*GK1*sqrt(ko)*rk1*xk1[id]*(v[id] - EK);
     
     return IK1;
 }
@@ -938,6 +939,7 @@ void OHaraCell<ncells>::setcell (int id, OHaraCell<1>* newcell)
     inafac[id] = newcell->inafac[0];
     ikrfac[id] = newcell->ikrfac[0];
     iksfac[id] = newcell->iksfac[0];
+    ik1fac[id] = newcell->ik1fac[0];
     
     icalfac[id] = newcell->icalfac[0];
     nacafac[id] = newcell->nacafac[0];
@@ -1009,6 +1011,7 @@ void OHaraCell<ncells>::getcell (int id, OHaraCell<1>* newcell)
     newcell->inafac[0] = inafac[id];
     newcell->ikrfac[0] = ikrfac[id];
     newcell->iksfac[0] = iksfac[id];
+    newcell->ik1fac[0] = ik1fac[id];
     
     newcell->icalfac[0] = icalfac[id];
     newcell->nacafac[0] = nacafac[id];

@@ -147,6 +147,7 @@ public:
     double inafac[ncells];
     double ikrfac[ncells];
     double iksfac[ncells];
+    double ik1fac[ncells];
     double icalfac[ncells];
     double nacafac[ncells];
     double yshift[ncells];
