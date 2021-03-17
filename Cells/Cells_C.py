@@ -39,8 +39,8 @@ class LR1CellIto(object):
         lib.LR1_settauxfac.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_double]
         lib.LR1_settauxfac.restype = ctypes.c_void_p
         
-        lib.LR1_setibarcafac.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_double]
-        lib.LR1_setibarcafac.restype = ctypes.c_void_p
+        lib.LR1_seticalfac.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_double]
+        lib.LR1_seticalfac.restype = ctypes.c_void_p
         
         lib.LR1CellIto_newsing.argtypes = None
         lib.LR1CellIto_newsing.restype = ctypes.c_void_p
@@ -69,8 +69,8 @@ class LR1CellIto(object):
         lib.LR1_settauxfacsing.argtypes = [ctypes.c_void_p, ctypes.c_double]
         lib.LR1_settauxfacsing.restype = ctypes.c_void_p
         
-        lib.LR1_setibarcafacsing.argtypes = [ctypes.c_void_p, ctypes.c_double]
-        lib.LR1_setibarcafacsing.restype = ctypes.c_void_p
+        lib.LR1_seticalfacsing.argtypes = [ctypes.c_void_p, ctypes.c_double]
+        lib.LR1_seticalfacsing.restype = ctypes.c_void_p
         
         lib.LR1_copycell.argtypes = [ctypes.c_void_p,ctypes.c_int, ctypes.c_void_p]
         lib.LR1_copycell.restype = ctypes.c_void_p
@@ -135,11 +135,11 @@ class LR1CellIto(object):
         else:
             lib.LR1_settauxfacsing(self.obj,ctypes.c_double(tauxf))
             
-    def setibarcafac(self,ibarca,ind=0):
+    def seticalfac(self,ibarca,ind=0):
         if (self.onecell is False):
-            lib.LR1_setibarcafac(self.obj,ctypes.c_int(ind),ctypes.c_double(ibarca))
+            lib.LR1_seticalfac(self.obj,ctypes.c_int(ind),ctypes.c_double(ibarca))
         else:
-            lib.LR1_setibarcafacsing(self.obj,ctypes.c_double(ibarca))
+            lib.LR1_seticalfacsing(self.obj,ctypes.c_double(ibarca))
     
     def copycell(self,newcell,ind=0):
         if (self.onecell is False):
@@ -202,8 +202,8 @@ class LR2CellIto(object):
         lib.LR2_settauxfac.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_double]
         lib.LR2_settauxfac.restype = ctypes.c_void_p
         
-        lib.LR2_setibarcafac.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_double]
-        lib.LR2_setibarcafac.restype = ctypes.c_void_p
+        lib.LR2_seticalfac.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_double]
+        lib.LR2_seticalfac.restype = ctypes.c_void_p
         
         lib.LR2_setiupfac.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_double]
         lib.LR2_setiupfac.restype = ctypes.c_void_p
@@ -250,8 +250,8 @@ class LR2CellIto(object):
         lib.LR2_setiupfacsing.argtypes = [ctypes.c_void_p, ctypes.c_double]
         lib.LR2_setiupfacsing.restype = ctypes.c_void_p
         
-        lib.LR2_setibarcafacsing.argtypes = [ctypes.c_void_p, ctypes.c_double]
-        lib.LR2_setibarcafacsing.restype = ctypes.c_void_p
+        lib.LR2_seticalfacsing.argtypes = [ctypes.c_void_p, ctypes.c_double]
+        lib.LR2_seticalfacsing.restype = ctypes.c_void_p
         
         lib.LR2_copycell.argtypes = [ctypes.c_void_p,ctypes.c_int, ctypes.c_void_p]
         lib.LR2_copycell.restype = ctypes.c_void_p
@@ -341,11 +341,11 @@ class LR2CellIto(object):
         else:
             lib.LR2_settauxfacsing(self.obj,ctypes.c_double(tauxf))
             
-    def setibarcafac(self,ibarca,ind=0):
+    def seticalfac(self,ibarca,ind=0):
         if (self.onecell is False):
-            lib.LR2_setibarcafac(self.obj,ctypes.c_int(ind),ctypes.c_double(ibarca))
+            lib.LR2_seticalfac(self.obj,ctypes.c_int(ind),ctypes.c_double(ibarca))
         else:
-            lib.LR2_setibarcafacsing(self.obj,ctypes.c_double(ibarca))
+            lib.LR2_seticalfacsing(self.obj,ctypes.c_double(ibarca))
             
     def setiup(self,iup,ind=0):
         if (self.onecell is False):
@@ -406,8 +406,8 @@ class LR1CellIto_nsca(object):
         lib.LR1_nsca_settauxfac.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_double]
         lib.LR1_nsca_settauxfac.restype = ctypes.c_void_p
         
-        lib.LR1_nsca_setibarcafac.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_double]
-        lib.LR1_nsca_setibarcafac.restype = ctypes.c_void_p
+        lib.LR1_nsca_seticalfac.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_double]
+        lib.LR1_nsca_seticalfac.restype = ctypes.c_void_p
         
         lib.LR1CellIto_nsca_newsing.argtypes = None
         lib.LR1CellIto_nsca_newsing.restype = ctypes.c_void_p
@@ -439,8 +439,8 @@ class LR1CellIto_nsca(object):
         lib.LR1_nsca_settauxfacsing.argtypes = [ctypes.c_void_p, ctypes.c_double]
         lib.LR1_nsca_settauxfacsing.restype = ctypes.c_void_p
         
-        lib.LR1_nsca_setibarcafacsing.argtypes = [ctypes.c_void_p, ctypes.c_double]
-        lib.LR1_nsca_setibarcafacsing.restype = ctypes.c_void_p
+        lib.LR1_nsca_seticalfacsing.argtypes = [ctypes.c_void_p, ctypes.c_double]
+        lib.LR1_nsca_seticalfacsing.restype = ctypes.c_void_p
         
         lib.LR1_nsca_copycell.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p]
         lib.LR1_nsca_copycell.restype = ctypes.c_void_p 
@@ -513,11 +513,11 @@ class LR1CellIto_nsca(object):
         else:
             lib.LR1_nsca_settauxfacsing(self.obj,ctypes.c_double(tauxf))
             
-    def setibarcafac(self,ibarca,ind=0):
+    def seticalfac(self,ibarca,ind=0):
         if (self.onecell is False):
-            lib.LR1_nsca_setibarcafac(self.obj,ctypes.c_int(ind),ctypes.c_double(ibarca))
+            lib.LR1_nsca_seticalfac(self.obj,ctypes.c_int(ind),ctypes.c_double(ibarca))
         else:
-            lib.LR1_nsca_setibarcafacsing(self.obj,ctypes.c_double(ibarca))        
+            lib.LR1_nsca_seticalfacsing(self.obj,ctypes.c_double(ibarca))        
     
     def copycell(self,newcell,ind=0):
         if (self.onecell is False):

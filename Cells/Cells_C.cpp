@@ -5,8 +5,6 @@
 #include "LR1CellIto.cpp"
 //#undef slowito
 
-#include <stdlib.h>
-
 extern "C"
 {
     LR1CellIto<CELLS>* LR1CellIto_new() {
@@ -80,12 +78,12 @@ extern "C"
     void LR1_settauxfacsing(LR1CellIto<1>* LR1Cell, double tauxf) {
          LR1Cell->tauXfac[0] = tauxf;
     }
-    void LR1_setibarcafac(LR1CellIto<CELLS>* LR1Cell, int id, double ibarca) {
+    void LR1_seticalfac(LR1CellIto<CELLS>* LR1Cell, int id, double ibarca) {
          if (id > -1 && id < CELLS) {
              LR1Cell->icalfac[id] = ibarca;
          }
     }
-    void LR1_setibarcafacsing(LR1CellIto<1>* LR1Cell, double ibarca) {
+    void LR1_seticalfacsing(LR1CellIto<1>* LR1Cell, double ibarca) {
          LR1Cell->icalfac[0] = ibarca;
     }
     
@@ -234,12 +232,12 @@ extern "C"
     void LR2_settauxfacsing(LR2CellIto<1>* LR2Cell, double tauxf) {
          LR2Cell->tauXfac[0] = tauxf;
     }
-    void LR2_setibarcafac(LR2CellIto<CELLS>* LR2Cell, int id, double ibarca) {
+    void LR2_seticalfac(LR2CellIto<CELLS>* LR2Cell, int id, double ibarca) {
          if (id > -1 && id < CELLS) {
              LR2Cell->icalfac[id] = ibarca;
          }
     }
-    void LR2_setibarcafacsing(LR2CellIto<1>* LR2Cell, double ibarca) {
+    void LR2_seticalfacsing(LR2CellIto<1>* LR2Cell, double ibarca) {
          LR2Cell->icalfac[0] = ibarca;
     }
     
@@ -362,12 +360,12 @@ extern "C"
     void LR1_nsca_settauxfacsing(LR1CellIto_nsca<1>* LR1Cell, double tauxf) {
          LR1Cell->tauXfac[0] = tauxf;
     }
-    void LR1_nsca_setibarcafac(LR1CellIto_nsca<CELLS>* LR1Cell, int id, double ibarca) {
+    void LR1_nsca_seticalfac(LR1CellIto_nsca<CELLS>* LR1Cell, int id, double ibarca) {
          if (id > -1 && id < CELLS) {
              LR1Cell->icalfac[id] = ibarca;
          }
     }
-    void LR1_nsca_setibarcafacsing(LR1CellIto_nsca<1>* LR1Cell, double ibarca) {
+    void LR1_nsca_seticalfacsing(LR1CellIto_nsca<1>* LR1Cell, double ibarca) {
          LR1Cell->icalfac[0] = ibarca;
     }
     
@@ -398,7 +396,7 @@ extern "C"
 }
 
 #include "TTCellIto.cpp"
-
+#define EPI
 extern "C"
 {
     TTCellIto<CELLS>* TTCellIto_new() {
@@ -472,3 +470,4 @@ extern "C"
         }
     }
 }
+#undef EPI
