@@ -336,12 +336,12 @@ double TTCellIto<ncells>::comp_ito (int id, double dt, double& dzdv, double& dyd
     
     ek = (rtf/zk)*log(ko/ki[id]);
     
-//    #ifdef EPI
+    #ifdef EPI
     R_INF=1./(1.+exp((20-(v[id] - rinfshift[id]))/6.));
     S_INF=1./(1.+exp(((v[id] - sinfshift[id])+20)/5.));
     TAU_R=9.5*exp(-((v[id] - taurshift[id])+40.)*((v[id] - taurshift[id])+40.)/1800.)+0.8;
     TAU_S=85.*exp(-((v[id] - tausshift[id])+45.)*((v[id] - tausshift[id])+45.)/320.)+5./(1.+exp(((v[id] - tausshift[id])-20.)/5.))+3.;
-//    #endif
+    #endif
     #ifdef ENDO
     R_INF=1./(1.+exp((20-(v[id] - rinfshift[id]))/6.));
     S_INF=1./(1.+exp(((v[id] - sinfshift[id])+28)/5.));

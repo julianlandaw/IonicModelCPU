@@ -395,8 +395,10 @@ extern "C"
     }
 }
 
-#include "TTCellIto.cpp"
 #define EPI
+#include "TTCellIto.cpp"
+#undef EPI
+
 extern "C"
 {
     TTCellIto<CELLS>* TTCellIto_new() {
@@ -470,4 +472,3 @@ extern "C"
         }
     }
 }
-#undef EPI
